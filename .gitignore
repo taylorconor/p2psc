@@ -1,0 +1,23 @@
+# Binaries #
+############
+*.o
+
+# IDE files #
+#############
+*.swp
+*.idea
+
+# Build directories #
+#####################
+build
+ninja-build
+
+# OS generated files #
+######################
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
