@@ -75,6 +75,7 @@ Peer may not yet have advertised to the Mediator. The Client will listen
 indefinitely (or within some reasonably long timeout) for messages on the socket
 it created with the Mediator.
 
+<a id="a_peer-identification"></a>
 When both the Client and Peer are registered with the Mediator, the Mediator
 sends a `PeerIdentification` message to the Client which registered with the
 Mediator first:
@@ -147,6 +148,7 @@ the Peer handshake step is now complete, as both the Client and Peer are now
 able to communicate P2P.
 
 ### Mediator deregistration
+<a id="a_deregister"></a>
 Once both the Peer and Client have accepted each others identity, the Client
 will send a `Deregister` message to the Mediator. This acknowledges the success
 of the Peer handshake, and prompts the Mediator to deregister both the Peer and
