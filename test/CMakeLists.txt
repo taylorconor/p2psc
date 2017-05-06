@@ -6,7 +6,8 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Werror -Wno-missing-braces -std=c
 add_executable(p2psc_test
         test.cpp
 
-        p2psc/connection_test.cpp)
+        p2psc/connection_test.cpp
+        p2psc/message_test.cpp)
 
 target_link_libraries(p2psc_test
         p2psc)
