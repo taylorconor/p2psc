@@ -11,12 +11,9 @@ BOOST_AUTO_TEST_CASE(ShouldDoSomething) {
   const auto keypair = key::Keypair();
   const auto peer_pub_key = key::PublicKey();
   const auto peer = Peer(peer_pub_key);
-  const auto mediator = Mediator("ip", 1337);
-  const auto callback = []() {
-    std::cout << "Banana" << std::endl;
-  };
+  const auto mediator = Mediator("127.0.0.1", 1337);
+  const auto callback = []() { std::cout << "Banana" << std::endl; };
   Connection::connectToPeer(keypair, peer, mediator, callback);
-  std::cout << "ShouldDoSomething" << std::endl;
 }
 
 BOOST_AUTO_TEST_SUITE_END()

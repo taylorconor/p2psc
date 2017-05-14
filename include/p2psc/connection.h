@@ -5,6 +5,7 @@
 #include <p2psc/key/keypair.h>
 #include <p2psc/mediator.h>
 #include <p2psc/peer.h>
+#include <p2psc/socket.h>
 
 namespace p2psc {
 
@@ -27,9 +28,14 @@ public:
                             const Mediator &, const Callback &);
 
 private:
+  // TODO: it could be a good idea to have a connectToPeer that accepts a custom
+  // TODO: executor so we can run tests synchronously and guarantee determinism.
   static void _executeAsynchronously(std::function<void()>);
+  static void _executeSynchronously(std::function<void()>);
 
-  static void _connectToPeer(const key::Keypair &, const Peer &,
-                             const Mediator &, const Callback &);
+  static void _handleConnection(const key::Keypair &, const Peer &,
+                                const Mediator &, const Callback &);
+  static void _connectToPeer(std::shared_ptr<Socket>, const key::Keypair &,
+                             const Peer &, const Mediator &);
 };
 }

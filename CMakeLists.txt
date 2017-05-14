@@ -14,12 +14,15 @@ add_library(p2psc
         include/p2psc/version.h
         include/p2psc/message/types.h
         include/p2psc/message/message_format.h
+        include/p2psc/socket.h
+        include/p2psc/socket/socket_exception.h
 
-        src/connection.cpp)
+        src/connection.cpp
+        src/socket.cpp)
 
 target_include_directories(p2psc PUBLIC include)
 
 add_subdirectory(test)
 add_subdirectory(vendor/spotify-json)
 
-target_link_libraries(p2psc spotify-json)
+target_link_libraries(p2psc spotify-json boost_system)
