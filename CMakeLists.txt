@@ -8,6 +8,7 @@ add_library(p2psc
         include/p2psc/connection.h
         include/p2psc/key/keypair.h
         include/p2psc/key/public_key.h
+        include/p2psc/log.h
         include/p2psc/mediator.h
         include/p2psc/message.h
         include/p2psc/message/advertise.h

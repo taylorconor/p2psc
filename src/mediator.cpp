@@ -1,3 +1,4 @@
+#include <p2psc/log.h>
 #include <p2psc/mediator.h>
 #include <p2psc/message.h>
 #include <p2psc/message/advertise.h>
@@ -23,15 +24,16 @@ Mediator::connect(const key::Keypair &our_keypair, const Peer &peer) const {
   // TODO: use data from our_keypair and peer
   const auto advertise = Message<message::Advertise>(
       message::Advertise{"our_test_key", "their_test_key"});
-  socket->send(encode(advertise.format()));
+  const auto raw_advertise = encode(advertise.format());
+  socket->send(raw_advertise);
+  LOG(level::Debug) << "Sending Advertise: " << raw_advertise;
 
   // receive advertise challenge
   const auto raw_advertise_challenge = socket->receive();
   const auto advertise_challenge =
       message::decode<message::AdvertiseChallenge>(raw_advertise_challenge);
-
-  std::cout << "Received advertise challenge: " << raw_advertise_challenge
-            << std::endl;
+  LOG(level::Debug) << "Received AdvertiseChallenge: "
+                    << raw_advertise_challenge;
 
   return socket;
 }
