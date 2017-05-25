@@ -44,12 +44,12 @@ Connection::_connectToPeer(const key::Keypair &our_keypair, const Peer &peer,
   auto socket_or_peer = mediator.connect(our_keypair, peer);
   if (socket_or_peer.type() == typeid(PunchedPeer)) {
     // TODO: implement this
-    throw socket::SocketException("Did not expect PunchedPeer");
+    throw std::runtime_error("Did not expect PunchedPeer");
   } else if (socket_or_peer.type() == typeid(std::shared_ptr<Socket>)) {
     return boost::get<std::shared_ptr<Socket>>(socket_or_peer);
   } else {
-    throw socket::SocketException("Unexpected typeid: " +
-                                  std::string(socket_or_peer.type().name()));
+    throw std::runtime_error("Unexpected typeid: " +
+                             std::string(socket_or_peer.type().name()));
   }
 }
 }
