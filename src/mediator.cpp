@@ -14,8 +14,8 @@ std::string Mediator::toString() const {
   return _socket_address.ip + ":" + std::to_string(_socket_address.port);
 }
 
-std::shared_ptr<Socket> Mediator::connect(const key::Keypair &our_keypair,
-                                          const Peer &peer) const {
+boost::variant<std::shared_ptr<Socket>, PunchedPeer>
+Mediator::connect(const key::Keypair &our_keypair, const Peer &peer) const {
   std::shared_ptr<Socket> socket = std::make_shared<Socket>(_socket_address);
 
   // TODO: use data from our_keypair and peer
