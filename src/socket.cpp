@@ -6,18 +6,17 @@ namespace {
 const int RECV_BUF_SIZE = 1024;
 }
 
-Socket::Socket(const std::string &ip, const std::uint16_t port)
-    : _ip(ip), _port(port) {
+Socket::Socket(const socket::SocketAddress &socket_address) : _is_open(false) {
   memset(&_address, 0, sizeof(_address));
   _address.sin_family = AF_INET;
-  _address.sin_port = htons(port);
-  inet_pton(AF_INET, ip.c_str(), &(_address.sin_addr));
+  _address.sin_port = htons(socket_address.port);
+  inet_pton(AF_INET, socket_address.ip.c_str(), &(_address.sin_addr));
   _sock_fd = ::socket(PF_INET, SOCK_STREAM, 0);
   _connect();
 }
 
 Socket::~Socket() {
-  if (!_is_open) {
+  if (_is_open) {
     ::close(_sock_fd);
     _is_open = false;
   }
@@ -29,7 +28,10 @@ void Socket::send(const std::string &message) {
   if (size != message.length()) {
     std::stringstream fmt;
     fmt << "Unexpected data send length. Expected: " << message.length()
-        << ", actual" << size;
+        << ", actual: " << size;
+    if (errno) {
+      fmt << ". Reason: " << strerror(errno);
+    }
     throw socket::SocketException(fmt.str());
   }
 }
@@ -55,8 +57,9 @@ void Socket::_connect() {
   BOOST_ASSERT(!_is_open);
   if (::connect(_sock_fd, (struct sockaddr *)&_address, sizeof(_address)) !=
       0) {
-    throw socket::SocketException("Failed to connect to " + _ip + ":" +
-                                  std::to_string(_port));
+    throw socket::SocketException(
+        "Failed to connect to " + std::string(inet_ntoa(_address.sin_addr)) +
+        ":" + std::to_string(ntohs(_address.sin_port)));
   }
   _is_open = true;
 }

@@ -3,6 +3,7 @@
 #include <arpa/inet.h>
 #include <iostream>
 #include <netinet/in.h>
+#include <p2psc/socket/socket_address.h>
 #include <p2psc/socket/socket_exception.h>
 #include <sstream>
 #include <sys/socket.h>
@@ -12,7 +13,7 @@ namespace p2psc {
 
 class Socket {
 public:
-  Socket(const std::string &, const std::uint16_t);
+  Socket(const socket::SocketAddress &socket_address);
   ~Socket();
 
   void send(const std::string &);
@@ -24,8 +25,6 @@ private:
 
   int _sock_fd;
   bool _is_open;
-  std::string _ip;
-  uint16_t _port;
   struct sockaddr_in _address;
 };
 }

@@ -35,7 +35,7 @@ private:
 
   static void _handleConnection(const key::Keypair &, const Peer &,
                                 const Mediator &, const Callback &);
-  static void _connectToPeer(std::shared_ptr<Socket>, const key::Keypair &,
-                             const Peer &, const Mediator &);
+  static std::shared_ptr<Socket> _connectToPeer(const key::Keypair &,
+                                                const Peer &, const Mediator &);
 };
 }
