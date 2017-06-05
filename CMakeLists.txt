@@ -6,6 +6,8 @@ set(CMAKE_CXX_FLAGS
 
 add_library(p2psc
         include/p2psc/connection.h
+        include/p2psc/crypto/crypto_exception.h
+        include/p2psc/crypto/rsa.h
         include/p2psc/key/keypair.h
         include/p2psc/key/public_key.h
         include/p2psc/log.h
@@ -26,11 +28,13 @@ add_library(p2psc
 
         src/connection.cpp
         src/mediator.cpp
+        src/rsa.cpp
         src/socket.cpp)
 
 target_include_directories(p2psc PUBLIC include)
 
 add_subdirectory(test)
 add_subdirectory(vendor/spotify-json)
+add_subdirectory(vendor/base64)
 
-target_link_libraries(p2psc spotify-json boost_system)
+target_link_libraries(p2psc spotify-json boost_system crypto)
