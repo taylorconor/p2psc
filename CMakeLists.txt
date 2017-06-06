@@ -7,6 +7,7 @@ set(CMAKE_CXX_FLAGS
 add_library(p2psc
         include/p2psc/connection.h
         include/p2psc/crypto/crypto_exception.h
+        include/p2psc/crypto/pki.h
         include/p2psc/crypto/rsa.h
         include/p2psc/key/keypair.h
         include/p2psc/key/public_key.h
