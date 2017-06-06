@@ -29,6 +29,7 @@ add_library(p2psc
 
         src/connection.cpp
         src/mediator.cpp
+        src/public_key.cpp
         src/rsa.cpp
         src/socket.cpp)
 
