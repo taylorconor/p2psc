@@ -28,6 +28,7 @@ add_library(p2psc
         include/p2psc/version.h
 
         src/connection.cpp
+        src/keypair.cpp
         src/mediator.cpp
         src/public_key.cpp
         src/rsa.cpp

@@ -1,8 +1,22 @@
 #pragma once
 
+#include <p2psc/crypto/pki.h>
+
 namespace p2psc {
 namespace key {
 
-class Keypair {};
+class Keypair {
+public:
+  static Keypair generate();
+
+  std::string public_encrypt(const std::string &) const;
+  std::string private_decrypt(const std::string &) const;
+  std::string get_serialised_public_key() const;
+
+private:
+  Keypair(std::shared_ptr<crypto::PKI>);
+
+  std::shared_ptr<crypto::PKI> _pki;
+};
 }
 }

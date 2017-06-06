@@ -21,9 +21,8 @@ boost::variant<std::shared_ptr<Socket>, PunchedPeer>
 Mediator::connect(const key::Keypair &our_keypair, const Peer &peer) const {
   std::shared_ptr<Socket> socket = std::make_shared<Socket>(_socket_address);
 
-  // TODO: use data from our_keypair and peer
-  const auto advertise = Message<message::Advertise>(
-      message::Advertise{"our_test_key", "their_test_key"});
+  const auto advertise = Message<message::Advertise>(message::Advertise{
+      our_keypair.get_serialised_public_key(), peer.public_key.serialise()});
   const auto raw_advertise = encode(advertise.format());
   socket->send(raw_advertise);
   LOG(level::Debug) << "Sending Advertise: " << raw_advertise;
@@ -34,6 +33,8 @@ Mediator::connect(const key::Keypair &our_keypair, const Peer &peer) const {
       message::decode<message::AdvertiseChallenge>(raw_advertise_challenge);
   LOG(level::Debug) << "Received AdvertiseChallenge: "
                     << raw_advertise_challenge;
+  const auto decrypted_nonce =
+      our_keypair.private_decrypt(advertise_challenge.payload.encrypted_nonce);
 
   return socket;
 }
