@@ -71,6 +71,24 @@ BOOST_AUTO_TEST_CASE(ShouldNotEncryptMoreThanMaxBytes) {
   }
 }
 
+BOOST_AUTO_TEST_CASE(ShouldSerialiseAndDeserialiseKey) {
+  const auto key = crypto::RSA::generate();
+  const auto key_str = key->get_public_key_string();
+  const auto restored_key = crypto::RSA::from_public_key(key_str);
+  const auto message = "bananas";
+  const auto message_encrypted = key->public_encrypt(message);
+  const auto message_encrypted_restored = restored_key->public_encrypt(message);
+  const auto message_decrypted = key->private_decrypt(message_encrypted);
+  const auto message_decrypted_restored =
+      key->private_decrypt(message_encrypted_restored);
+  // PKCS#1 v1.5 adds 8 bits of random data. it is therefore unlikely (but
+  // possible) that two identical messages will be encrypted to the same
+  // value. we don't assert `message_encrypted != message_encrypted_restored`
+  // because it is possible.
+  BOOST_ASSERT(message == message_decrypted);
+  BOOST_ASSERT(message_decrypted == message_decrypted_restored);
+}
+
 BOOST_AUTO_TEST_SUITE_END()
 }
 }

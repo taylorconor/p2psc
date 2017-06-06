@@ -14,15 +14,26 @@ using RSA_ptr = std::unique_ptr<::RSA, decltype(&::RSA_free)>;
 ::RSA *generate_new_key() {
   ::RSA *rsa(RSA_new());
   BN_ptr bn(BN_new(), ::BN_free);
-
   BN_set_word(bn.get(), RSA_F4);
+
   RSA_generate_key_ex(rsa, kDefaultKeySize, bn.get(), NULL);
   return rsa;
 }
 
+std::string bio_to_string(BIO *bio) {
+  char *bptr;
+  const auto length = BIO_get_mem_data(bio, &bptr);
+  return std::string(bptr, bptr + length);
+}
+
 ::RSA *string_to_key(const std::string &key_str) {
-  const auto bio = BIO_new_mem_buf(key_str.c_str(), key_str.length());
-  return PEM_read_bio_RSA_PUBKEY(bio, 0, 0, 0);
+  BIO *bio = BIO_new_mem_buf(key_str.c_str(), key_str.length());
+  ::RSA *key = PEM_read_bio_RSAPublicKey(bio, 0, 0, 0);
+  std::string str = bio_to_string(bio);
+  if (!key) {
+    throw CryptoException("Could not load RSA public key from string");
+  }
+  return key;
 }
 
 inline void check_error(const std::string &method, int size) {
@@ -31,12 +42,6 @@ inline void check_error(const std::string &method, int size) {
     ERR_error_string_n(ERR_get_error(), errbuf, 1024);
     throw CryptoException(method + " failed: " + errbuf);
   }
-}
-
-std::string bio_to_string(BIO *bio) {
-  char *bptr;
-  const auto length = BIO_get_mem_data(bio, &bptr);
-  return std::string(bptr, bptr + length);
 }
 
 std::string key_to_string_public(::RSA *key) {
