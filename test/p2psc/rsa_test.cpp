@@ -168,6 +168,18 @@ BOOST_AUTO_TEST_CASE(ShouldNotWriteKeyToFileWithInvalidCipher) {
   }
 }
 
+BOOST_AUTO_TEST_CASE(ShouldNotDecryptWithoutPassword) {
+  const auto generated_key = crypto::RSA::generate();
+  const auto filename = "/tmp/p2psc_testfile";
+  generated_key->write_to_file(filename, "password", "aes-256-cbc");
+  try {
+    const auto key = crypto::RSA::from_pem(filename);
+    remove(filename);
+    BOOST_FAIL("Should have thrown CryptoException");
+  } catch (const crypto::CryptoException &e) {
+  }
+}
+
 BOOST_AUTO_TEST_SUITE_END()
 }
 }

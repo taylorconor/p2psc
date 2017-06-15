@@ -60,14 +60,13 @@ int password_callback(char *buf, int size, int rwflag, void *userdata) {
   BIO *bio = BIO_new(BIO_s_file());
   BIO_read_filename(bio, path.c_str());
 
-  pem_password_cb *password_cb = nullptr;
-  void *password_ptr = nullptr;
-  if (password) {
-    password_cb = password_callback;
-    password_ptr = (void *)password->c_str();
-  }
-  // the private key will also contain the public key
-  ::RSA *key = PEM_read_bio_RSAPrivateKey(bio, 0, password_cb, password_ptr);
+  // if `password` is not set, we still pass an empty password which will
+  // result in a "bad password read" error. this is to prevent openssl from
+  // prompting for a PEM password over stdin if the user fails to supply a
+  // password for a protected PEM file.
+  ::RSA *key = PEM_read_bio_RSAPrivateKey(
+      bio, 0, password_callback,
+      (void *)(password ? password->c_str() : ""));
   if (!key) {
     throw CryptoException("Could not restore key from file: " + path + ". " +
                           get_openssl_error_str());
