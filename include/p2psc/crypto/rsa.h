@@ -18,9 +18,12 @@ public:
   static constexpr int max_data_size(std::uint16_t key_size) {
     return (key_size / 8) - 11;
   };
+  static const int min_password_length = 4;
 
   static std::shared_ptr<RSA> from_public_key(const std::string &public_key);
   static std::shared_ptr<RSA> from_pem(const std::string &path);
+  static std::shared_ptr<RSA> from_pem(const std::string &path,
+                                       const std::string &password);
   static std::shared_ptr<RSA> generate();
 
   std::string public_encrypt(const std::string &message) const override;
@@ -31,6 +34,8 @@ public:
   std::string get_public_key_string() const override;
 
   void write_to_file(const std::string &path) const override;
+  void write_to_file(const std::string &path, const std::string &password,
+                     const std::string &cipher) const override;
 
   ~RSA();
 

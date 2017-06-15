@@ -15,6 +15,9 @@ public:
   virtual std::string get_public_key_string() const = 0;
 
   virtual void write_to_file(const std::string &path) const = 0;
+  virtual void write_to_file(const std::string &path,
+                             const std::string &password,
+                             const std::string &cipher) const = 0;
 };
 }
 }

@@ -1,4 +1,5 @@
 #include <base64/base64.h>
+#include <boost/optional.hpp>
 #include <openssl/err.h>
 #include <p2psc/crypto/crypto_exception.h>
 #include <p2psc/crypto/rsa.h>
@@ -9,7 +10,6 @@ namespace crypto {
 namespace {
 
 using BN_ptr = std::unique_ptr<BIGNUM, decltype(&::BN_free)>;
-using RSA_ptr = std::unique_ptr<::RSA, decltype(&::RSA_free)>;
 
 ::RSA *generate_new_key() {
   ::RSA *rsa(RSA_new());
@@ -30,32 +30,54 @@ std::string bio_to_string(BIO *bio) {
   // TODO: does this leak?
   BIO *bio = BIO_new_mem_buf(key_str.c_str(), key_str.length());
   ::RSA *key = PEM_read_bio_RSAPublicKey(bio, 0, 0, 0);
-  std::string str = bio_to_string(bio);
   if (!key) {
     throw CryptoException("Could not load RSA public key from string");
   }
   return key;
 }
 
-::RSA *file_to_key(const std::string &path) {
+std::string get_openssl_error_str() {
+  char errbuf[1024];
+  ERR_error_string_n(ERR_get_error(), errbuf, 1024);
+  return "OpenSSL exception: " + std::string(errbuf);
+}
+
+int password_callback(char *buf, int size, int rwflag, void *userdata) {
+  const char *pw = (const char *)userdata;
+  const auto len = strlen(pw);
+  if (len > size) {
+    throw CryptoException("Password length (" + std::to_string(len) +
+                          ") greater than buffer size (" +
+                          std::to_string(size) + ").");
+  }
+  memcpy(buf, pw, len);
+  return len;
+}
+
+::RSA *file_to_key(const std::string &path,
+                   const boost::optional<std::string> &password) {
+  OpenSSL_add_all_algorithms();
   BIO *bio = BIO_new(BIO_s_file());
   BIO_read_filename(bio, path.c_str());
+
+  pem_password_cb *password_cb = nullptr;
+  void *password_ptr = nullptr;
+  if (password) {
+    password_cb = password_callback;
+    password_ptr = (void *)password->c_str();
+  }
   // the private key will also contain the public key
-  ::RSA *key = PEM_read_bio_RSAPrivateKey(bio, 0, 0, 0);
+  ::RSA *key = PEM_read_bio_RSAPrivateKey(bio, 0, password_cb, password_ptr);
   if (!key) {
-    char errbuf[1024];
-    ERR_error_string_n(ERR_get_error(), errbuf, 1024);
     throw CryptoException("Could not restore key from file: " + path + ". " +
-                          errbuf);
+                          get_openssl_error_str());
   }
   return key;
 }
 
 inline void check_error(const std::string &method, int size) {
   if (size == -1) {
-    char errbuf[1024];
-    ERR_error_string_n(ERR_get_error(), errbuf, 1024);
-    throw CryptoException(method + " failed: " + errbuf);
+    throw CryptoException(method + " failed: " + get_openssl_error_str());
   }
 }
 
@@ -73,7 +95,12 @@ std::shared_ptr<RSA> RSA::from_public_key(const std::string &public_key) {
 }
 
 std::shared_ptr<RSA> RSA::from_pem(const std::string &path) {
-  return std::shared_ptr<RSA>(new RSA(file_to_key(path), true));
+  return std::shared_ptr<RSA>(new RSA(file_to_key(path, boost::none), true));
+}
+
+std::shared_ptr<RSA> RSA::from_pem(const std::string &path,
+                                   const std::string &password) {
+  return std::shared_ptr<RSA>(new RSA(file_to_key(path, password), true));
 }
 
 std::shared_ptr<RSA> RSA::generate() {
@@ -135,7 +162,33 @@ std::string RSA::get_public_key_string() const {
 
 void RSA::write_to_file(const std::string &path) const {
   BIO *bio = BIO_new_file(path.c_str(), "w");
-  PEM_write_bio_RSAPrivateKey(bio, _key, 0, 0, 0, 0, 0);
+  int ret = PEM_write_bio_RSAPrivateKey(bio, _key, 0, 0, 0, 0, 0);
+  if (!ret) {
+    throw CryptoException("Could not write to file.");
+  }
+  BIO_free_all(bio);
+}
+
+void RSA::write_to_file(const std::string &path, const std::string &password,
+                        const std::string &cipher) const {
+  // TODO: these functions will not work with ciphers which require an IV!
+  if (password.length() < min_password_length) {
+    throw CryptoException("Password needs to be at least " +
+                          std::to_string(min_password_length) +
+                          " characters long");
+  }
+  OpenSSL_add_all_algorithms();
+  BIO *bio = BIO_new_file(path.c_str(), "w");
+  const evp_cipher_st *cipher_st = EVP_get_cipherbyname(cipher.c_str());
+  if (!cipher_st) {
+    throw CryptoException("Unknown cipher \"" + cipher + "\".");
+  }
+  int ret = PEM_write_bio_RSAPrivateKey(bio, _key, cipher_st,
+                                        (unsigned char *)password.c_str(),
+                                        password.length(), 0, 0);
+  if (!ret) {
+    throw CryptoException("Could not write to file.");
+  }
   BIO_free_all(bio);
 }
 }

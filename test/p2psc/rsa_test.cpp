@@ -120,6 +120,54 @@ BOOST_AUTO_TEST_CASE(ShouldNotRestoreKeyFromNonExistantFile) {
   }
 }
 
+BOOST_AUTO_TEST_CASE(ShouldRestoreKeyFromFileWithPassword) {
+  const auto generated_key = crypto::RSA::generate();
+  const auto filename = "/tmp/p2psc_testfile";
+  const auto min_password = std::string(crypto::RSA::min_password_length, 'z');
+  generated_key->write_to_file(filename, min_password, "aes-256-cbc");
+  const auto key = crypto::RSA::from_pem(filename, min_password);
+  const auto encrypted = key->public_encrypt(message);
+  const auto decrypted = key->private_decrypt(encrypted);
+  BOOST_ASSERT(decrypted == message);
+  remove(filename);
+}
+
+BOOST_AUTO_TEST_CASE(ShouldNotRestoreKeyFromFileWithIncorrectPassword) {
+  const auto generated_key = crypto::RSA::generate();
+  const auto filename = "/tmp/p2psc_testfile";
+  generated_key->write_to_file(filename, "my_password", "aes-256-cbc");
+  try {
+    const auto key = crypto::RSA::from_pem(filename, "wrong_password");
+    BOOST_FAIL("Should have thrown CryptoException");
+  } catch (const crypto::CryptoException &e) {
+  }
+  remove(filename);
+}
+
+BOOST_AUTO_TEST_CASE(ShouldNotWriteKeyToFileWithInvalidPassword) {
+  const auto generated_key = crypto::RSA::generate();
+  const auto filename = "/tmp/p2psc_testfile";
+  try {
+    generated_key->write_to_file(
+        filename, std::string(crypto::RSA::min_password_length - 1, 'z'),
+        "aes-256-cbc");
+    remove(filename);
+    BOOST_FAIL("Should have thrown CryptoException");
+  } catch (const crypto::CryptoException &e) {
+  }
+}
+
+BOOST_AUTO_TEST_CASE(ShouldNotWriteKeyToFileWithInvalidCipher) {
+  const auto generated_key = crypto::RSA::generate();
+  const auto filename = "/tmp/p2psc_testfile";
+  try {
+    generated_key->write_to_file(filename, "my_password", "invalid_cipher");
+    remove(filename);
+    BOOST_FAIL("Should have thrown CryptoException");
+  } catch (const crypto::CryptoException &e) {
+  }
+}
+
 BOOST_AUTO_TEST_SUITE_END()
 }
 }
