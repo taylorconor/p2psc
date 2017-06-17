@@ -1,11 +1,13 @@
-#include <p2psc/key/keypair.h>
 #include <p2psc/crypto/rsa.h>
+#include <p2psc/key/keypair.h>
 
 namespace p2psc {
 namespace key {
 
-Keypair Keypair::generate() {
-  return Keypair(crypto::RSA::generate());
+Keypair Keypair::generate() { return Keypair(crypto::RSA::generate()); }
+
+Keypair Keypair::from_pem(const std::string &path) {
+  return Keypair(crypto::RSA::from_pem(path));
 }
 
 Keypair::Keypair(std::shared_ptr<crypto::PKI> pki) : _pki(pki) {}

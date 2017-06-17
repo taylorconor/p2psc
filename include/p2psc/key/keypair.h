@@ -8,9 +8,10 @@ namespace key {
 class Keypair {
 public:
   static Keypair generate();
+  static Keypair from_pem(const std::string &path);
 
-  std::string public_encrypt(const std::string &) const;
-  std::string private_decrypt(const std::string &) const;
+  std::string public_encrypt(const std::string &message) const;
+  std::string private_decrypt(const std::string &message) const;
   std::string get_serialised_public_key() const;
 
 private:
