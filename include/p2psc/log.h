@@ -35,9 +35,14 @@ enum level { Error, Warning, Info, Debug };
 class Log {
 public:
   Log(enum level l) : _level(l) {}
-  ~Log() { std::cout << _stream.str() << std::endl; }
+  ~Log() {
+    std::string stream_string = _stream.str();
+    const auto end = stream_string.find_last_not_of("\n");
+    stream_string.erase(end + 1);
+    std::cout << stream_string << std::endl;
+  }
   std::ostringstream &get() {
-    _stream << current_time() << " " << level_strings[_level] << ": ";
+    _stream << current_time() << " " << level_strings[_level] << ":\t";
     return _stream;
   }
 
