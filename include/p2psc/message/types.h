@@ -16,5 +16,29 @@ static const MessageType kTypePeerChallengeResponse = 5;
 static const MessageType kTypePeerResponse = 6;
 static const MessageType kTypePeerSecret = 7;
 static const MessageType kTypeDeregister = 8;
+
+inline std::string get_message_type(MessageType type) {
+  switch (type) {
+  case kTypeAdvertise:
+    return "Advertise";
+  case kTypeAdvertiseChallenge:
+    return "AdvertiseChallenge";
+  case kTypeAdvertiseResponse:
+    return "AdvertiseResponse";
+  case kTypePeerIdentification:
+    return "PeerIdentification";
+  case kTypePeerChallenge:
+    return "PeerChallenge";
+  case kTypePeerChallengeResponse:
+    return "PeerChallengeResponse";
+  case kTypePeerResponse:
+    return "PeerResponse";
+  case kTypePeerSecret:
+    return "PeerSecret";
+  case kTypeDeregister:
+    return "Deregister";
+  }
+  return "Unknown (" + std::to_string(type) + ")";
+}
 }
 }
