@@ -19,5 +19,14 @@ static message::MessageFormat<T> decode(const std::string &message) {
         " message. Reason: " + std::string(e.what()));
   }
 }
+
+static MessageType decode_message_type(const std::string &message) {
+  try {
+    return spotify::json::decode<message::AnonymousMessageFormat>(message).type;
+  } catch (const spotify::json::decode_exception &e) {
+    throw message::MessageException(
+        "Could not decode anonymous message. Reason: " + std::string(e.what()));
+  }
+}
 }
 }

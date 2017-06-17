@@ -15,6 +15,7 @@ add_library(p2psc
         include/p2psc/mediator.h
         include/p2psc/message.h
         include/p2psc/message/advertise.h
+        include/p2psc/message/anonymous_message_format.h
         include/p2psc/message/advertise_challenge.h
         include/p2psc/message/advertise_response.h
         include/p2psc/message/message_decoder.h

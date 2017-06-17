@@ -1,5 +1,6 @@
 #pragma once
 
+#include <p2psc/message/anonymous_message_format.h>
 #include <p2psc/message/types.h>
 #include <p2psc/version.h>
 #include <spotify/json.hpp>
@@ -10,8 +11,7 @@ namespace message {
 /**
  * MessageFormat defines the format of all messages sent and received by p2psc.
  */
-template <class T> struct MessageFormat {
-  std::uint8_t version = kVersion;
+template <class T> struct MessageFormat : AnonymousMessageFormat {
   message::MessageType type = T::type;
   T payload;
 };
