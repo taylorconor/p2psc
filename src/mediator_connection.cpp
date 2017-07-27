@@ -26,11 +26,12 @@ template <class T> Message<T> receive_and_log(std::shared_ptr<Socket> socket) {
   return message.payload;
 }
 }
+
 MediatorConnection::MediatorConnection(const Mediator &mediator)
     : _mediator(mediator), _connected(false), _socket(nullptr) {}
 
-boost::variant<std::shared_ptr<Socket>, PunchedPeer>
-MediatorConnection::connect(const key::Keypair &our_keypair, const Peer &peer) {
+void MediatorConnection::connect(const key::Keypair &our_keypair,
+                                 const Peer &peer) {
   BOOST_ASSERT(!_connected);
   _socket = std::make_shared<Socket>(_mediator.socket_address);
 
@@ -71,12 +72,35 @@ MediatorConnection::connect(const key::Keypair &our_keypair, const Peer &peer) {
     _punched_peer = PunchedPeer(peer, socket_address);
   } else if (message_type == message::kTypePeerChallenge) {
     LOG(level::Debug) << "Received PeerChallenge: " << raw_message;
+    const auto challenge_format =
+        message::decode<message::PeerChallenge>(raw_message);
+    _peer_challenge = challenge_format.payload;
   } else {
     LOG(level::Error) << "Received unexpected message type: "
                       << message::message_type_string(message_type) << ": "
                       << raw_message;
   }
+}
 
+bool MediatorConnection::has_punched_peer() const {
+  return _punched_peer.is_initialized();
+}
+
+PunchedPeer MediatorConnection::get_punched_peer() const {
+  BOOST_ASSERT(_punched_peer);
+  return *_punched_peer;
+}
+
+bool MediatorConnection::has_peer_challenge() const {
+  return _peer_challenge.is_initialized();
+}
+
+message::PeerChallenge MediatorConnection::get_peer_challenge() const {
+  BOOST_ASSERT(_peer_challenge);
+  return *_peer_challenge;
+}
+
+std::shared_ptr<Socket> MediatorConnection::get_socket() const {
   return _socket;
 }
 }

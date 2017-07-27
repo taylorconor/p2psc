@@ -43,15 +43,15 @@ Connection::_connectToPeer(const key::Keypair &our_keypair, const Peer &peer,
   // verify our identities. Otherwise, we first must create a socket with the
   // Peer before verification can happen.
   auto mediator_connection = MediatorConnection(mediator);
-  auto socket_or_peer = mediator_connection.connect(our_keypair, peer);
-  if (socket_or_peer.type() == typeid(PunchedPeer)) {
+  mediator_connection.connect(our_keypair, peer);
+  if (mediator_connection.has_punched_peer()) {
     // TODO: implement this
     throw std::runtime_error("Did not expect PunchedPeer");
-  } else if (socket_or_peer.type() == typeid(std::shared_ptr<Socket>)) {
-    return boost::get<std::shared_ptr<Socket>>(socket_or_peer);
+  } else if (mediator_connection.has_peer_challenge()) {
+    // TODO: send peer challenge response
   } else {
-    throw std::runtime_error("Unexpected typeid: " +
-                             std::string(socket_or_peer.type().name()));
+    throw std::runtime_error("No PunchedPeer or PeerChallenge");
   }
+  return mediator_connection.get_socket();
 }
 }
