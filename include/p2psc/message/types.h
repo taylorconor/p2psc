@@ -17,7 +17,7 @@ static const MessageType kTypePeerResponse = 6;
 static const MessageType kTypePeerSecret = 7;
 static const MessageType kTypeDeregister = 8;
 
-inline std::string get_message_type(MessageType type) {
+inline std::string message_type_string(MessageType type) {
   switch (type) {
   case kTypeAdvertise:
     return "Advertise";
@@ -37,8 +37,9 @@ inline std::string get_message_type(MessageType type) {
     return "PeerSecret";
   case kTypeDeregister:
     return "Deregister";
+  default:
+    return "Unknown (" + std::to_string(type) + ")";
   }
-  return "Unknown (" + std::to_string(type) + ")";
 }
 }
 }

@@ -11,5 +11,6 @@ struct PunchedPeer {
 
   PunchedPeer(const Peer &peer, const socket::SocketAddress address)
       : peer(peer), address(address) {}
+  PunchedPeer& operator=(const PunchedPeer&) { return *this; }
 };
 }

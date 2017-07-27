@@ -2,6 +2,7 @@
 #include <p2psc/connection.h>
 #include <p2psc/message.h>
 #include <thread>
+#include <p2psc/mediator_connection.h>
 
 namespace p2psc {
 void Connection::connectToPeer(const key::Keypair &our_keypair,
@@ -41,7 +42,8 @@ Connection::_connectToPeer(const key::Keypair &our_keypair, const Peer &peer,
   // connection will yield a socket with the peer over which we must then
   // verify our identities. Otherwise, we first must create a socket with the
   // Peer before verification can happen.
-  auto socket_or_peer = mediator.connect(our_keypair, peer);
+  auto mediator_connection = MediatorConnection(mediator);
+  auto socket_or_peer = mediator_connection.connect(our_keypair, peer);
   if (socket_or_peer.type() == typeid(PunchedPeer)) {
     // TODO: implement this
     throw std::runtime_error("Did not expect PunchedPeer");

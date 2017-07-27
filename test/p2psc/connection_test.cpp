@@ -8,7 +8,8 @@ namespace test {
 BOOST_AUTO_TEST_SUITE(connection_test)
 
 BOOST_AUTO_TEST_CASE(ShouldDoSomething) {
-  const auto keypair = key::Keypair::generate();
+  const auto keypair = key::Keypair::from_pem(
+      "/Users/taylorconor/Documents/personal/p2psc/private.pem");
   const auto peer_pub_key = key::PublicKey::generate();
   const auto peer = Peer(peer_pub_key);
   const auto mediator = Mediator(socket::SocketAddress("127.0.0.1", 1337));
