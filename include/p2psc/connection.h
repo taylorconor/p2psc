@@ -19,7 +19,7 @@ public:
    * Custom callback function to be called when the connection has been setup,
    * or when an error occurs.
    */
-  using Callback = std::function<void()>;
+  using Callback = std::function<void(std::shared_ptr<Socket>)>;
 
   /*
    * Creates a socket with a known Peer.

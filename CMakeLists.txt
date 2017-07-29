@@ -42,6 +42,7 @@ add_library(p2psc
 target_include_directories(p2psc PUBLIC include)
 
 add_subdirectory(test)
+add_subdirectory(integration)
 add_subdirectory(vendor/spotify-json)
 add_subdirectory(vendor/base64)
 

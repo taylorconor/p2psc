@@ -1,8 +1,8 @@
 #include <iostream>
 #include <p2psc/connection.h>
+#include <p2psc/mediator_connection.h>
 #include <p2psc/message.h>
 #include <thread>
-#include <p2psc/mediator_connection.h>
 
 namespace p2psc {
 void Connection::connectToPeer(const key::Keypair &our_keypair,
