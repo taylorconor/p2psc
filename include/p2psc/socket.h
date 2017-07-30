@@ -14,6 +14,7 @@ namespace p2psc {
 class Socket {
 public:
   Socket(const socket::SocketAddress &socket_address);
+  Socket(int sock_fd);
   ~Socket();
 
   void send(const std::string &);

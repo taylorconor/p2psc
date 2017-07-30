@@ -15,6 +15,8 @@ Socket::Socket(const socket::SocketAddress &socket_address) : _is_open(false) {
   _connect();
 }
 
+Socket::Socket(int sock_fd) : _sock_fd(sock_fd), _is_open(true) {}
+
 Socket::~Socket() {
   if (_is_open) {
     ::close(_sock_fd);
