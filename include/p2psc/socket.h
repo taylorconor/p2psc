@@ -21,6 +21,8 @@ public:
   std::string receive();
 
 private:
+  Socket(const Socket &) = delete;
+
   void _connect();
   void _check_is_open();
 

@@ -44,7 +44,12 @@ std::string Socket::receive() {
   char receive_buffer[RECV_BUF_SIZE];
   ssize_t received_bytes;
   do {
-    received_bytes = recv(_sock_fd, receive_buffer, RECV_BUF_SIZE, 0);
+    received_bytes = read(_sock_fd, receive_buffer, RECV_BUF_SIZE);
+    if (received_bytes == -1) {
+      throw socket::SocketException(
+          "receive failed (fd=" + std::to_string(_sock_fd) +
+          "): " + std::string(strerror(errno)));
+    }
     received_data +=
         std::string(receive_buffer, receive_buffer + received_bytes);
   } while (received_bytes == RECV_BUF_SIZE);
