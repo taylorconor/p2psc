@@ -6,10 +6,14 @@ set(CMAKE_CXX_FLAGS
 
 add_executable(p2psc_integration_test
         include/util/client.h
+        include/util/fake_mediator.h
+        include/util/local_listening_socket.h
 
         test.cpp
+        src/client_it.cpp
         src/util/client.cpp
-        src/client_it.cpp)
+        src/util/fake_mediator.cpp
+        src/util/local_listening_socket.cpp)
 
 target_link_libraries(p2psc_integration_test
         p2psc)
