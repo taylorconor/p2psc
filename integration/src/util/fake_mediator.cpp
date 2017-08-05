@@ -1,5 +1,6 @@
-#include <boost/assert.hpp>
 #include <include/util/fake_mediator.h>
+#include <p2psc/log.h>
+#include <p2psc/message/message_decoder.h>
 
 namespace p2psc {
 namespace integration {
@@ -40,12 +41,20 @@ void FakeMediator::_run() {
 }
 
 void FakeMediator::_handle_connection(std::shared_ptr<Socket> session_socket) {
-  const auto message = session_socket->receive();
-  std::cout << "FakeMediator received message: " << message << std::endl;
+  const auto raw_message = session_socket->receive();
+  const auto message_type =
+      message::message_type_string(message::decode_message_type(raw_message));
+  _received_messages.push_back(raw_message);
+  LOG(level::Debug) << "FakeMediator received " << message_type
+                    << " message: " << raw_message << std::endl;
 }
 
 p2psc::Mediator FakeMediator::get_mediator_description() const {
   return _mediator;
+}
+
+std::vector<std::string> FakeMediator::get_received_messages() const {
+  return _received_messages;
 }
 }
 }
