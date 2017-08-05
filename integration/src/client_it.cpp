@@ -11,6 +11,7 @@ BOOST_AUTO_TEST_SUITE(client_integration_test)
 
 BOOST_AUTO_TEST_CASE(ShouldSendValidAdvertise) {
   util::FakeMediator mediator;
+  mediator.quit_after(message::kTypeAdvertise);
   mediator.run();
 
   const auto keypair = key::Keypair::generate();

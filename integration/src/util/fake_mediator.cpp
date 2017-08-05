@@ -30,6 +30,10 @@ void FakeMediator::stop() {
   _thread.join();
 }
 
+void FakeMediator::quit_after(message::MessageType message_type) {
+  _quit_after = message_type;
+}
+
 void FakeMediator::_run() {
   while (_is_running) {
     auto socket = _socket.accept();
@@ -42,11 +46,17 @@ void FakeMediator::_run() {
 
 void FakeMediator::_handle_connection(std::shared_ptr<Socket> session_socket) {
   const auto raw_message = session_socket->receive();
-  const auto message_type =
-      message::message_type_string(message::decode_message_type(raw_message));
+  const auto message_type = message::decode_message_type(raw_message);
   _received_messages.push_back(raw_message);
-  LOG(level::Debug) << "FakeMediator received " << message_type
+  LOG(level::Debug) << "FakeMediator received "
+                    << message::message_type_string(message_type)
                     << " message: " << raw_message << std::endl;
+  if (message_type == _quit_after) {
+    LOG(level::Debug) << "Finishing FakeMediator connection handling (after "
+                      << message::message_type_string(_quit_after) << ")";
+    return;
+  }
+  // TODO: continue connection handling
 }
 
 p2psc::Mediator FakeMediator::get_mediator_description() const {
