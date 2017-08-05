@@ -1,5 +1,6 @@
 #pragma once
 
+#include <boost/type_index.hpp>
 #include <p2psc/message/message_exception.h>
 #include <p2psc/message/message_format.h>
 #include <spotify/json/decode.hpp>
