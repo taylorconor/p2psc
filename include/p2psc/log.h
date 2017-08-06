@@ -1,5 +1,6 @@
 #pragma once
 
+#include <boost/filesystem/path.hpp>
 #include <iomanip>
 #include <iostream>
 #include <sstream>
@@ -30,11 +31,12 @@ enum level { Error, Warning, Info, Debug };
   if (level > REPORTING_LEVEL)                                                 \
     ;                                                                          \
   else                                                                         \
-    Log(level).get()
+    Log(level, __FILE__, __LINE__).get()
 
 class Log {
 public:
-  Log(enum level l) : _level(l) {}
+  Log(enum level l, const char *file, long line)
+      : _level(l), _file(file), _line(line) {}
   ~Log() {
     std::string stream_string = _stream.str();
     const auto end = stream_string.find_last_not_of("\n");
@@ -42,7 +44,8 @@ public:
     std::cout << stream_string << std::endl;
   }
   std::ostringstream &get() {
-    _stream << current_time() << " " << level_strings[_level] << ":\t";
+    _stream << current_time() << " " << level_strings[_level] << "\t"
+            << _file.filename().string() << ":" << _line << ":\t";
     return _stream;
   }
 
@@ -51,6 +54,8 @@ private:
   Log &operator=(const Log &);
 
   enum level _level;
+  boost::filesystem::path _file;
+  long _line;
   std::ostringstream _stream;
 };
 }

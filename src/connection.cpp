@@ -1,5 +1,6 @@
 #include <iostream>
 #include <p2psc/connection.h>
+#include <p2psc/log.h>
 #include <p2psc/mediator_connection.h>
 #include <p2psc/message.h>
 #include <thread>
@@ -26,7 +27,7 @@ void Connection::_handleConnection(const key::Keypair &our_keypair,
     std::shared_ptr<Socket> socket =
         _connectToPeer(our_keypair, peer, mediator);
   } catch (const socket::SocketException &e) {
-    std::cout << "Failed to connect to peer: " << e.what() << std::endl;
+    LOG(level::Error) << "Failed to connect to peer: " << e.what();
     // TODO: error callback
   }
 }

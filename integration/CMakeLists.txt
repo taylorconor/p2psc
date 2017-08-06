@@ -16,7 +16,9 @@ add_executable(p2psc_integration_test
         src/util/local_listening_socket.cpp)
 
 target_link_libraries(p2psc_integration_test
-        p2psc)
+        p2psc
+        boost_system
+        boost_filesystem)
 target_include_directories(p2psc_integration_test PRIVATE
         .
         ../src)
