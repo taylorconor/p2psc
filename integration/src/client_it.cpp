@@ -26,10 +26,12 @@ BOOST_AUTO_TEST_CASE(ShouldSendValidAdvertise) {
                            mediator.get_mediator_description(), keypair);
   const auto socket = peer.connect();
 
-  const auto mediator_messages = mediator.get_received_messages();
-  BOOST_ASSERT(mediator_messages.size() == 1);
+  const auto received_messages = mediator.get_received_messages();
+  BOOST_ASSERT(received_messages.size() == 1);
+  const auto sent_messages = mediator.get_sent_messages();
+  BOOST_ASSERT(sent_messages.size() == 0);
   const auto advertise =
-      message::decode<message::Advertise>(mediator_messages[0]);
+      message::decode<message::Advertise>(received_messages[0]);
   BOOST_ASSERT(advertise.payload.our_key ==
                keypair.get_serialised_public_key());
   BOOST_ASSERT(advertise.payload.their_key == peer_pub_key.serialise());
