@@ -2,7 +2,7 @@ cmake_minimum_required (VERSION 2.6)
 project (p2psc_integration_test)
 
 set(CMAKE_CXX_FLAGS
-        "${CMAKE_CXX_FLAGS} -Wall -Werror -Wno-missing-braces -std=c++14")
+        "${CMAKE_CXX_FLAGS} -Wall -Werror -Wno-missing-braces -Wno-unused-function -std=c++14")
 
 add_executable(p2psc_integration_test
         include/util/client.h

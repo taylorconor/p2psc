@@ -7,6 +7,10 @@
 namespace p2psc {
 namespace integration {
 
+/**
+ * This integration test suite tests a real Peer (wrapped in a Client helper
+ * class) against a fake mediator.
+ */
 BOOST_AUTO_TEST_SUITE(client_integration_test)
 
 BOOST_AUTO_TEST_CASE(ShouldSendValidAdvertise) {
@@ -27,14 +31,6 @@ BOOST_AUTO_TEST_CASE(ShouldSendValidAdvertise) {
   BOOST_ASSERT(advertise.payload.our_key ==
                keypair.get_serialised_public_key());
   BOOST_ASSERT(advertise.payload.their_key == peer_pub_key.serialise());
-}
-
-BOOST_AUTO_TEST_CASE(ShouldDoAThing) {
-  try {
-    message::decode_message_type("banana");
-  } catch (std::exception e) {
-    // TODO: fix decode_message_type unused function error!
-  }
 }
 
 BOOST_AUTO_TEST_SUITE_END()
