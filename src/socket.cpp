@@ -9,8 +9,8 @@ const int RECV_BUF_SIZE = 1024;
 Socket::Socket(const socket::SocketAddress &socket_address) : _is_open(false) {
   memset(&_address, 0, sizeof(_address));
   _address.sin_family = AF_INET;
-  _address.sin_port = htons(socket_address.port);
-  inet_pton(AF_INET, socket_address.ip.c_str(), &(_address.sin_addr));
+  _address.sin_port = htons(socket_address.port());
+  inet_pton(AF_INET, socket_address.ip().c_str(), &(_address.sin_addr));
   _sock_fd = ::socket(PF_INET, SOCK_STREAM, 0);
   _connect();
 }
@@ -58,6 +58,12 @@ std::string Socket::receive() {
     throw socket::SocketException("receive failed: Peer closed connection");
   }
   return received_data;
+}
+
+socket::SocketAddress Socket::get_socket_address() {
+  char ip_str[INET_ADDRSTRLEN];
+  inet_ntop(AF_INET, &(_address.sin_addr), ip_str, INET_ADDRSTRLEN);
+  return socket::SocketAddress(ip_str, _address.sin_port);
 }
 
 void Socket::_connect() {

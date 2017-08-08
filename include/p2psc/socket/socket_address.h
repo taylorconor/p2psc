@@ -10,12 +10,17 @@ namespace socket {
  * This serves as an abstraction above sockaddr_in. <p2psc/socket.h> will
  * internally convert it to a sockaddr_in.
  */
-struct SocketAddress {
-  const std::string ip;
-  const std::uint16_t port;
-
+class SocketAddress {
+public:
   SocketAddress(const std::string &ip, std::uint16_t port)
-      : ip(ip), port(port) {}
+      : _ip(ip), _port(port) {}
+
+  std::string ip() const { return _ip; }
+  std::uint16_t port() const { return _port; }
+
+private:
+  std::string _ip;
+  std::uint16_t _port;
 };
 }
 }
