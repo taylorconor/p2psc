@@ -1,5 +1,6 @@
 #pragma once
 
+#include <include/util/id_to_address_store.h>
 #include <include/util/local_listening_socket.h>
 #include <p2psc/mediator.h>
 #include <p2psc/message.h>
@@ -29,9 +30,11 @@ public:
 private:
   LocalListeningSocket _socket;
   p2psc::Mediator _mediator;
+  IdToAddressStore _id_to_address_store;
   bool _is_running;
   message::MessageType _quit_after;
-  std::thread _thread;
+  std::thread _worker_thread;
+  std::vector<std::thread> _handler_pool;
   std::vector<std::string> _received_messages;
   std::vector<std::string> _sent_messages;
 

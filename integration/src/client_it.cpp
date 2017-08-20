@@ -61,6 +61,36 @@ BOOST_AUTO_TEST_CASE(ShouldCorrectlyProveIdentityWithNonce) {
   BOOST_ASSERT(decrypted_nonce == advertise_response.payload.nonce);
 }
 
+BOOST_AUTO_TEST_CASE(ShouldSendPeerIdentificationToFirstPeer) {
+  util::FakeMediator mediator;
+  mediator.quit_after(message::kTypePeerIdentification);
+  mediator.run();
+
+  const auto client_keypair = key::Keypair::generate();
+  const auto peer_keypair = key::Keypair::generate();
+  auto client =
+      util::Client(Peer(key::PublicKey::from_string(
+                       peer_keypair.get_serialised_public_key())),
+                   mediator.get_mediator_description(), client_keypair);
+  // the client connects first
+  const auto client_socket = client.connect();
+  std::this_thread::sleep_for(std::chrono::milliseconds(50));
+  auto peer = util::Client(Peer(key::PublicKey::from_string(
+                               client_keypair.get_serialised_public_key())),
+                           mediator.get_mediator_description(), peer_keypair);
+  const auto peer_socket = peer.connect();
+  std::this_thread::sleep_for(std::chrono::milliseconds(50));
+  // TODO: these won't be nullptr once the mediator handshake responses have
+  // been implemented.
+  BOOST_ASSERT(client_socket == nullptr);
+  BOOST_ASSERT(peer_socket == nullptr);
+
+  const auto sent_messages = mediator.get_sent_messages();
+  BOOST_ASSERT(sent_messages.size() == 3);
+  const auto message_type = message::decode_message_type(sent_messages[2]);
+  BOOST_ASSERT(message_type == message::kTypePeerIdentification);
+}
+
 BOOST_AUTO_TEST_SUITE_END()
 }
 }

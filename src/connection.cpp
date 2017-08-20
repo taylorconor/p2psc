@@ -9,8 +9,8 @@ namespace p2psc {
 void Connection::connectToPeer(const key::Keypair &our_keypair,
                                const Peer &peer, const Mediator &mediator,
                                const Callback &callback) {
-  _executeSynchronously(std::bind(Connection::_handleConnection, our_keypair,
-                                  peer, mediator, callback));
+  _executeAsynchronously(std::bind(Connection::_handleConnection, our_keypair,
+                                   peer, mediator, callback));
 }
 
 void Connection::_executeAsynchronously(std::function<void()> f) {
@@ -47,9 +47,14 @@ Connection::_connectToPeer(const key::Keypair &our_keypair, const Peer &peer,
   mediator_connection.connect(our_keypair, peer);
   if (mediator_connection.has_punched_peer()) {
     // TODO: implement this
-    throw std::runtime_error("Did not expect PunchedPeer");
+    LOG(level::Warning) << "Unimplemented: received PunchedPeer from mediator"
+                           " connection";
+    return nullptr;
   } else if (mediator_connection.has_peer_challenge()) {
     // TODO: send peer challenge response
+    LOG(level::Warning) << "Unimplemented: received PeerChallenge from mediator"
+                           " connection";
+    return nullptr;
   } else {
     throw std::runtime_error("No PunchedPeer or PeerChallenge");
   }

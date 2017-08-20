@@ -1,11 +1,11 @@
 #include <include/util/fake_mediator.h>
 #include <p2psc/crypto/rsa.h>
 #include <p2psc/log.h>
-#include <p2psc/message.h>
 #include <p2psc/message/advertise.h>
 #include <p2psc/message/advertise_challenge.h>
 #include <p2psc/message/advertise_response.h>
 #include <p2psc/message/message_decoder.h>
+#include <p2psc/message/peer_identification.h>
 
 #define QUIT_IF_REQUESTED(message_type, quit_indicator)                        \
   if (message_type == quit_indicator) {                                        \
@@ -32,14 +32,17 @@ FakeMediator::~FakeMediator() {
 void FakeMediator::run() {
   BOOST_ASSERT(!_is_running);
   _is_running = true;
-  _thread = std::thread(&FakeMediator::_run, this);
+  _worker_thread = std::thread(&FakeMediator::_run, this);
 }
 
 void FakeMediator::stop() {
   BOOST_ASSERT(_is_running);
   _is_running = false;
   _socket.close();
-  _thread.join();
+  _worker_thread.join();
+  for (auto &handler_thread : _handler_pool) {
+    handler_thread.join();
+  }
 }
 
 void FakeMediator::quit_after(message::MessageType message_type) {
@@ -52,7 +55,8 @@ void FakeMediator::_run() {
     if (!socket) {
       continue;
     }
-    _handle_connection(socket);
+    _handler_pool.emplace_back(
+        std::thread(&FakeMediator::_handle_connection, this, socket));
   }
 }
 
@@ -82,6 +86,41 @@ void FakeMediator::_handle_connection(std::shared_ptr<Socket> session_socket) {
   const auto advertise_response =
       _receive_and_log<message::AdvertiseResponse>(session_socket);
   QUIT_IF_REQUESTED(advertise_response.format().type, _quit_after);
+
+  const auto maybe_peer =
+      _id_to_address_store.get(advertise.format().payload.their_key);
+  if (!maybe_peer) {
+    // In this case, this peer is the Client, and we are waiting for the Peer to
+    // come online. We store the Clients address and wait for the other peer to
+    // come online so we can send a PeerIdentification back to the Client.
+    _id_to_address_store.put(advertise.format().payload.our_key,
+                             session_socket->get_socket_address());
+    // Timeout after 2 seconds
+    const auto awaited_peer =
+        _id_to_address_store.await(advertise.format().payload.their_key, 2000);
+    if (!awaited_peer) {
+      // if we never receive an awaited peer, we can't continue
+      LOG(level::Error) << "Never received Advertise from peer: "
+                        << advertise.format().payload.their_key;
+      return;
+    }
+
+    /*
+     * PeerIdentification
+     */
+    const auto socket_address = session_socket->get_socket_address();
+    const auto peer_identification = Message<message::PeerIdentification>(
+        message::PeerIdentification{awaited_peer->ip(), awaited_peer->port()});
+    _send_and_log(session_socket, peer_identification);
+    QUIT_IF_REQUESTED(peer_identification.format().type, _quit_after);
+  } else {
+    // In this case, this peer is the Peer, since the Client has already come
+    // online. The Mediator is done with this peer now.
+    _id_to_address_store.put(advertise.format().payload.our_key,
+                             session_socket->get_socket_address());
+    LOG(level::Debug) << "Registered Peer. Client is already registered";
+    sleep(1);
+  }
 }
 
 template <class T>
