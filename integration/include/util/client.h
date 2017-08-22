@@ -15,7 +15,8 @@ public:
          const p2psc::key::Keypair &keypair)
       : _peer(peer), _mediator(mediator), _keypair(keypair) {}
 
-  std::shared_ptr<Socket> connect();
+  std::shared_ptr<Socket> connect_async();
+  std::shared_ptr<Socket> connect_sync(uint64_t timeout_ms);
 
 private:
   p2psc::Peer _peer;

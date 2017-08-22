@@ -8,6 +8,13 @@
 
 namespace p2psc {
 namespace integration {
+namespace {
+const uint64_t kDefaultPeerConnectTimeout = 50;
+
+void block(uint64_t ms) {
+  std::this_thread::sleep_for(std::chrono::milliseconds(ms));
+}
+}
 
 /**
  * This integration test suite tests a real Peer (wrapped in a Client helper
@@ -24,12 +31,11 @@ BOOST_AUTO_TEST_CASE(ShouldSendValidAdvertise) {
   const auto peer_pub_key = key::PublicKey::generate();
   auto peer = util::Client(Peer(peer_pub_key),
                            mediator.get_mediator_description(), keypair);
-  const auto socket = peer.connect();
+  const auto socket = peer.connect_sync(kDefaultPeerConnectTimeout);
 
   const auto received_messages = mediator.get_received_messages();
   BOOST_ASSERT(received_messages.size() == 1);
-  const auto sent_messages = mediator.get_sent_messages();
-  BOOST_ASSERT(sent_messages.size() == 0);
+  BOOST_ASSERT(mediator.get_sent_messages().size() == 0);
   const auto advertise =
       message::decode<message::Advertise>(received_messages[0]);
   BOOST_ASSERT(advertise.payload.our_key ==
@@ -46,7 +52,7 @@ BOOST_AUTO_TEST_CASE(ShouldCorrectlyProveIdentityWithNonce) {
   const auto peer_pub_key = key::PublicKey::generate();
   auto peer = util::Client(Peer(peer_pub_key),
                            mediator.get_mediator_description(), keypair);
-  const auto socket = peer.connect();
+  const auto socket = peer.connect_sync(kDefaultPeerConnectTimeout);
 
   const auto received_messages = mediator.get_received_messages();
   BOOST_ASSERT(received_messages.size() == 2);
@@ -73,13 +79,13 @@ BOOST_AUTO_TEST_CASE(ShouldSendPeerIdentificationToFirstPeer) {
                        peer_keypair.get_serialised_public_key())),
                    mediator.get_mediator_description(), client_keypair);
   // the client connects first
-  const auto client_socket = client.connect();
-  std::this_thread::sleep_for(std::chrono::milliseconds(50));
+  const auto client_socket = client.connect_async();
+  block(kDefaultPeerConnectTimeout);
   auto peer = util::Client(Peer(key::PublicKey::from_string(
                                client_keypair.get_serialised_public_key())),
                            mediator.get_mediator_description(), peer_keypair);
-  const auto peer_socket = peer.connect();
-  std::this_thread::sleep_for(std::chrono::milliseconds(50));
+  const auto peer_socket = peer.connect_async();
+  block(kDefaultPeerConnectTimeout);
   // TODO: these won't be nullptr once the mediator handshake responses have
   // been implemented.
   BOOST_ASSERT(client_socket == nullptr);
