@@ -13,8 +13,8 @@ BOOST_AUTO_TEST_CASE(ShouldDoSomething) {
   const auto peer_pub_key = key::PublicKey::generate();
   const auto peer = Peer(peer_pub_key);
   const auto mediator = Mediator(socket::SocketAddress("127.0.0.1", 1337));
-  const auto callback = []() { std::cout << "Banana" << std::endl; };
-  Connection::connectToPeer(keypair, peer, mediator, callback);
+  //const auto callback = []() { std::cout << "Banana" << std::endl; };
+  Connection::connect(keypair, peer, mediator, nullptr);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

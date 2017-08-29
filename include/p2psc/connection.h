@@ -24,18 +24,15 @@ public:
   /*
    * Creates a socket with a known Peer.
    */
-  static void connectToPeer(const key::Keypair &, const Peer &,
-                            const Mediator &, const Callback &);
+  static void connect(const key::Keypair &, const Peer &, const Mediator &,
+                      const Callback &);
 
 private:
-  // TODO: it could be a good idea to have a connectToPeer that accepts a custom
-  // TODO: executor so we can run tests synchronously and guarantee determinism.
-  static void _executeAsynchronously(std::function<void()>);
-  static void _executeSynchronously(std::function<void()>);
+  static void _execute_asynchronously(std::function<void()>);
 
-  static void _handleConnection(const key::Keypair &, const Peer &,
-                                const Mediator &, const Callback &);
-  static std::shared_ptr<Socket> _connectToPeer(const key::Keypair &,
-                                                const Peer &, const Mediator &);
+  static void _handle_connection(const key::Keypair &, const Peer &,
+                                 const Mediator &, const Callback &);
+  static std::shared_ptr<Socket> _connect(const key::Keypair &, const Peer &,
+                                          const Mediator &);
 };
 }

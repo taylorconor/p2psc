@@ -6,35 +6,31 @@
 #include <thread>
 
 namespace p2psc {
-void Connection::connectToPeer(const key::Keypair &our_keypair,
-                               const Peer &peer, const Mediator &mediator,
-                               const Callback &callback) {
-  _executeAsynchronously(std::bind(Connection::_handleConnection, our_keypair,
-                                   peer, mediator, callback));
+void Connection::connect(const key::Keypair &our_keypair, const Peer &peer,
+                         const Mediator &mediator, const Callback &callback) {
+  _execute_asynchronously(std::bind(Connection::_handle_connection, our_keypair,
+                                    peer, mediator, callback));
 }
 
-void Connection::_executeAsynchronously(std::function<void()> f) {
+void Connection::_execute_asynchronously(std::function<void()> f) {
   std::thread thread(f);
   thread.detach();
 }
 
-void Connection::_executeSynchronously(std::function<void()> f) { f(); }
-
-void Connection::_handleConnection(const key::Keypair &our_keypair,
-                                   const Peer &peer, const Mediator &mediator,
-                                   const Callback &callback) {
+void Connection::_handle_connection(const key::Keypair &our_keypair,
+                                    const Peer &peer, const Mediator &mediator,
+                                    const Callback &callback) {
   try {
-    std::shared_ptr<Socket> socket =
-        _connectToPeer(our_keypair, peer, mediator);
+    std::shared_ptr<Socket> socket = _connect(our_keypair, peer, mediator);
   } catch (const socket::SocketException &e) {
     LOG(level::Error) << "Failed to connect to peer: " << e.what();
     // TODO: error callback
   }
 }
 
-std::shared_ptr<Socket>
-Connection::_connectToPeer(const key::Keypair &our_keypair, const Peer &peer,
-                           const Mediator &mediator) {
+std::shared_ptr<Socket> Connection::_connect(const key::Keypair &our_keypair,
+                                             const Peer &peer,
+                                             const Mediator &mediator) {
   // Depending on who handshakes with the Mediator first, either we will have
   // to connect to the Peer (we handshake first) or the Peer will connect
   // with us (they handshake first).
