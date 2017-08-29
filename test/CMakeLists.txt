@@ -12,7 +12,9 @@ add_executable(p2psc_test
         p2psc/rsa_test.cpp)
 
 target_link_libraries(p2psc_test
-        p2psc)
+        p2psc
+        boost_system
+        boost_filesystem)
 target_include_directories(p2psc_test PRIVATE
         .
         ../src)
