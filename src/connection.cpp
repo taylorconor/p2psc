@@ -24,7 +24,8 @@ void Connection::_handle_connection(const key::Keypair &our_keypair,
     std::shared_ptr<Socket> socket = _connect(our_keypair, peer, mediator);
   } catch (const socket::SocketException &e) {
     LOG(level::Error) << "Failed to connect to peer: " << e.what();
-    // TODO: error callback
+    // TODO: make an exception class specifically designed for returning an
+    // error in the callback
   }
 }
 
@@ -42,10 +43,10 @@ std::shared_ptr<Socket> Connection::_connect(const key::Keypair &our_keypair,
   auto mediator_connection = MediatorConnection(mediator);
   mediator_connection.connect(our_keypair, peer);
   if (mediator_connection.has_punched_peer()) {
-    // TODO: implement this
-    LOG(level::Warning) << "Unimplemented: received PunchedPeer from mediator"
-                           " connection";
-    return nullptr;
+    const auto socket =
+        _connect_as_client(mediator_connection.get_punched_peer());
+    mediator_connection.deregister();
+    return socket;
   } else if (mediator_connection.has_peer_challenge()) {
     // TODO: send peer challenge response
     LOG(level::Warning) << "Unimplemented: received PeerChallenge from mediator"
@@ -55,5 +56,13 @@ std::shared_ptr<Socket> Connection::_connect(const key::Keypair &our_keypair,
     throw std::runtime_error("No PunchedPeer or PeerChallenge");
   }
   return mediator_connection.get_socket();
+}
+
+std::shared_ptr<Socket>
+Connection::_connect_as_client(const PunchedPeer &punched_peer) {
+  std::shared_ptr<Socket> socket =
+      std::make_shared<Socket>(punched_peer.address);
+  // TODO: Implement peer handshake
+  return socket;
 }
 }
