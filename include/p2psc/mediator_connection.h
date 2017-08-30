@@ -15,7 +15,7 @@ public:
   MediatorConnection(const Mediator &mediator);
 
   void connect(const key::Keypair &our_keypair, const Peer &peer);
-  void deregister();
+  void deregister(const std::string &);
 
   bool has_punched_peer() const;
   PunchedPeer get_punched_peer() const;

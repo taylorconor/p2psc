@@ -69,10 +69,10 @@ void MediatorConnection::connect(const key::Keypair &our_keypair,
   }
 }
 
-void MediatorConnection::deregister() {
+void MediatorConnection::deregister(const std::string &secret) {
   BOOST_ASSERT(_connected);
   const auto deregister =
-      Message<message::Deregister>(message::Deregister{_challenge_secret});
+      Message<message::Deregister>(message::Deregister{secret});
   message::send_and_log(_socket, deregister);
   _connected = false;
 }
