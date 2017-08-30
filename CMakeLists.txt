@@ -27,6 +27,7 @@ add_library(p2psc
         include/p2psc/message/peer_challenge.h
         include/p2psc/message/peer_challenge_response.h
         include/p2psc/message/peer_identification.h
+        include/p2psc/message/peer_response.h
         include/p2psc/message/types.h
         include/p2psc/peer.h
         include/p2psc/punched_peer.h

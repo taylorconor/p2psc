@@ -6,6 +6,7 @@
 #include <p2psc/message.h>
 #include <p2psc/message/message_util.h>
 #include <p2psc/message/peer_challenge_response.h>
+#include <p2psc/message/peer_response.h>
 #include <thread>
 
 namespace p2psc {
@@ -92,6 +93,11 @@ Connection::_connect_as_client(const PunchedPeer &punched_peer,
     throw std::runtime_error(
         "PeerChallengeResponse: Could not decrypt encrypted_nonce");
   }
+
+  // send peer response
+  const auto peer_response = Message<message::PeerResponse>(
+      message::PeerResponse{decrypted_peer_nonce});
+  message::send_and_log(socket, peer_challenge);
 
   // TODO: Implement peer handshake
   return socket;
