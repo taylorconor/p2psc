@@ -2,6 +2,7 @@
 
 #include <p2psc/log.h>
 #include <p2psc/message.h>
+#include <p2psc/message/message_decoder.h>
 #include <p2psc/socket.h>
 
 namespace p2psc {

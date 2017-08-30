@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.6)
 project(p2psc)
 
 set(CMAKE_CXX_FLAGS
-        "${CMAKE_CXX_FLAGS} -Wall -Werror -Wno-missing-braces -std=c++14")
+        "${CMAKE_CXX_FLAGS} -Wall -Werror -Wno-missing-braces -Wno-unused-function -std=c++14")
 
 add_library(p2psc
         include/p2psc/connection.h
@@ -25,6 +25,7 @@ add_library(p2psc
         include/p2psc/message/message_format.h
         include/p2psc/message/message_util.h
         include/p2psc/message/peer_challenge.h
+        include/p2psc/message/peer_challenge_response.h
         include/p2psc/message/peer_identification.h
         include/p2psc/message/types.h
         include/p2psc/peer.h

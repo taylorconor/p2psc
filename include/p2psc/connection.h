@@ -35,6 +35,7 @@ private:
                                  const Mediator &, const Callback &);
   static std::shared_ptr<Socket> _connect(const key::Keypair &, const Peer &,
                                           const Mediator &);
-  static std::shared_ptr<Socket> _connect_as_client(const PunchedPeer &);
+  static std::shared_ptr<Socket> _connect_as_client(const PunchedPeer &,
+                                                    const key::Keypair &);
 };
 }
