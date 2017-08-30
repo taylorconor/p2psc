@@ -62,6 +62,7 @@ std::shared_ptr<Socket>
 Connection::_connect_as_client(const PunchedPeer &punched_peer) {
   std::shared_ptr<Socket> socket =
       std::make_shared<Socket>(punched_peer.address);
+
   // TODO: Implement peer handshake
   return socket;
 }

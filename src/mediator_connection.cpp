@@ -7,26 +7,10 @@
 #include <p2psc/message/advertise_response.h>
 #include <p2psc/message/deregister.h>
 #include <p2psc/message/message_decoder.h>
+#include <p2psc/message/message_util.h>
 #include <p2psc/message/peer_identification.h>
 
 namespace p2psc {
-namespace {
-template <class T>
-void send_and_log(std::shared_ptr<Socket> socket, const Message<T> &message) {
-  const auto json = encode(message.format());
-  socket->send(json);
-  const auto message_type = message::message_type_string(message.format().type);
-  LOG(level::Debug) << "Sending " << message_type << ": " << json;
-}
-
-template <class T> Message<T> receive_and_log(std::shared_ptr<Socket> socket) {
-  const auto raw_message = socket->receive();
-  auto message = message::decode<T>(raw_message);
-  const auto message_type = message::message_type_string(message.type);
-  LOG(level::Debug) << "Received " << message_type << ": " << raw_message;
-  return message.payload;
-}
-}
 
 MediatorConnection::MediatorConnection(const Mediator &mediator)
     : _mediator(mediator), _connected(false), _socket(nullptr) {}
@@ -39,11 +23,11 @@ void MediatorConnection::connect(const key::Keypair &our_keypair,
   // send advertise
   const auto advertise = Message<message::Advertise>(message::Advertise{
       our_keypair.get_serialised_public_key(), peer.public_key.serialise()});
-  send_and_log(_socket, advertise);
+  message::send_and_log(_socket, advertise);
 
   // receive advertise challenge
   const auto advertise_challenge =
-      receive_and_log<message::AdvertiseChallenge>(_socket);
+      message::receive_and_log<message::AdvertiseChallenge>(_socket);
   _challenge_secret = advertise_challenge.format().payload.secret;
 
   std::string decrypted_nonce;
@@ -58,7 +42,7 @@ void MediatorConnection::connect(const key::Keypair &our_keypair,
   // send advertise response
   const auto advertise_response = Message<message::AdvertiseResponse>(
       message::AdvertiseResponse{decrypted_nonce});
-  send_and_log(_socket, advertise_response);
+  message::send_and_log(_socket, advertise_response);
 
   // now we wait for either a PeerIdentification message from the Mediator,
   // or for a PeerChallenge from the Peer.
@@ -89,7 +73,7 @@ void MediatorConnection::deregister() {
   BOOST_ASSERT(_connected);
   const auto deregister =
       Message<message::Deregister>(message::Deregister{_challenge_secret});
-  send_and_log(_socket, deregister);
+  message::send_and_log(_socket, deregister);
   _connected = false;
 }
 

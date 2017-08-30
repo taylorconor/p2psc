@@ -23,6 +23,7 @@ add_library(p2psc
         include/p2psc/message/message_decoder.h
         include/p2psc/message/message_exception.h
         include/p2psc/message/message_format.h
+        include/p2psc/message/message_util.h
         include/p2psc/message/peer_challenge.h
         include/p2psc/message/peer_identification.h
         include/p2psc/message/types.h
