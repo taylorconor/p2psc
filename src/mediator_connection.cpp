@@ -95,6 +95,11 @@ message::PeerChallenge MediatorConnection::get_peer_challenge() const {
   return *_peer_challenge;
 }
 
+std::string MediatorConnection::get_challenge_secret() const {
+  BOOST_ASSERT(_peer_challenge);
+  return _challenge_secret;
+}
+
 std::shared_ptr<Socket> MediatorConnection::get_socket() const {
   return _socket;
 }

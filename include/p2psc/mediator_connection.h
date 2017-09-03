@@ -21,6 +21,7 @@ public:
   PunchedPeer get_punched_peer() const;
   bool has_peer_challenge() const;
   message::PeerChallenge get_peer_challenge() const;
+  std::string get_challenge_secret() const;
 
   std::shared_ptr<Socket> get_socket() const;
 

@@ -12,6 +12,11 @@
 
 namespace p2psc {
 namespace {
+std::string generate_nonce() {
+  std::srand(std::time(0));
+  return std::to_string(std::rand());
+}
+
 std::shared_ptr<Socket>
 _connect_as_client(MediatorConnection &mediator_connection,
                    const key::Keypair &our_keypair) {
@@ -19,8 +24,7 @@ _connect_as_client(MediatorConnection &mediator_connection,
       std::make_shared<Socket>(mediator_connection.get_punched_peer().address);
 
   // send peer challenge
-  std::srand(std::time(0));
-  const std::string nonce = std::to_string(std::rand());
+  const std::string nonce = generate_nonce();
   const auto encrypted_nonce =
       mediator_connection.get_punched_peer().peer.public_key.encrypt(nonce);
   const auto peer_challenge =
@@ -59,6 +63,43 @@ _connect_as_client(MediatorConnection &mediator_connection,
   mediator_connection.deregister(peer_secret.format().payload.secret);
 
   return socket;
+}
+
+std::shared_ptr<Socket>
+_connect_as_peer(MediatorConnection &mediator_connection,
+                 const key::Keypair &our_keypair) {
+  // send peer challenge response
+  const std::string nonce = generate_nonce();
+  const auto encrypted_nonce =
+      mediator_connection.get_punched_peer().peer.public_key.encrypt(nonce);
+
+  std::string decrypted_client_nonce;
+  try {
+    decrypted_client_nonce = our_keypair.private_decrypt(
+        mediator_connection.get_peer_challenge().encrypted_nonce);
+  } catch (crypto::CryptoException &e) {
+    throw std::runtime_error(
+        "PeerChallenge: Could not decrypt encrypted_nonce");
+  }
+
+  const auto peer_challenge_response = Message<message::PeerChallengeResponse>(
+      message::PeerChallengeResponse{encrypted_nonce, decrypted_client_nonce});
+  message::send_and_log(mediator_connection.get_socket(),
+                        peer_challenge_response);
+
+  // receive peer response
+  const auto peer_response = message::receive_and_log<message::PeerResponse>(
+      mediator_connection.get_socket());
+  if (peer_response.format().payload.decrypted_nonce != encrypted_nonce) {
+    throw std::runtime_error("PeerResponse: peer did not pass verification");
+  }
+
+  // send peer secret
+  const auto peer_secret = Message<message::PeerSecret>(
+      message::PeerSecret{mediator_connection.get_challenge_secret()});
+  message::send_and_log(mediator_connection.get_socket(), peer_secret);
+
+  return mediator_connection.get_socket();
 }
 }
 
@@ -101,10 +142,7 @@ std::shared_ptr<Socket> Connection::_connect(const key::Keypair &our_keypair,
   if (mediator_connection.has_punched_peer()) {
     return _connect_as_client(mediator_connection, our_keypair);
   } else if (mediator_connection.has_peer_challenge()) {
-    // TODO: send peer challenge response
-    LOG(level::Warning) << "Unimplemented: received PeerChallenge from mediator"
-                           " connection";
-    return nullptr;
+    return _connect_as_peer(mediator_connection, our_keypair);
   } else {
     throw std::runtime_error("No PunchedPeer or PeerChallenge");
   }
