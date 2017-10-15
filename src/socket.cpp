@@ -15,7 +15,10 @@ Socket::Socket(const socket::SocketAddress &socket_address) : _is_open(false) {
   _connect();
 }
 
-Socket::Socket(int sock_fd) : _sock_fd(sock_fd), _is_open(true) {}
+Socket::Socket(int sock_fd) : _sock_fd(sock_fd), _is_open(true) {
+  socklen_t len = sizeof(_address);
+  getpeername(_sock_fd, (struct sockaddr*)&_address, &len);
+}
 
 Socket::~Socket() {
   if (_is_open) {
