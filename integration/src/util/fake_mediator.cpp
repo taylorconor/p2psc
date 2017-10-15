@@ -130,7 +130,10 @@ void FakeMediator::_send_and_log(std::shared_ptr<Socket> socket,
   socket->send(json);
   const auto message_type = message::message_type_string(message.format().type);
   _sent_messages.push_back(json);
-  LOG(level::Debug) << "Sending " << message_type << ": " << json;
+  LOG(level::Debug) << "Sending " << message_type << " to "
+                    << socket->get_socket_address().ip() << ":"
+                    << socket->get_socket_address().port() << ": "
+                    << json;
 }
 
 template <class T>
@@ -139,7 +142,10 @@ Message<T> FakeMediator::_receive_and_log(std::shared_ptr<Socket> socket) {
   auto message = message::decode<T>(raw_message);
   const auto message_type = message::message_type_string(message.type);
   _received_messages.push_back(raw_message);
-  LOG(level::Debug) << "Received " << message_type << ": " << raw_message;
+  LOG(level::Debug) << "Received " << message_type << " from "
+                    << socket->get_socket_address().ip() << ":"
+                    << socket->get_socket_address().port() << ": "
+                    << raw_message;
   return message.payload;
 }
 
