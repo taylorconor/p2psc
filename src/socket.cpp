@@ -17,7 +17,7 @@ Socket::Socket(const socket::SocketAddress &socket_address) : _is_open(false) {
 
 Socket::Socket(int sock_fd) : _sock_fd(sock_fd), _is_open(true) {
   socklen_t len = sizeof(_address);
-  getpeername(_sock_fd, (struct sockaddr*)&_address, &len);
+  getpeername(_sock_fd, (struct sockaddr *)&_address, &len);
 }
 
 Socket::~Socket() {
@@ -71,11 +71,13 @@ socket::SocketAddress Socket::get_socket_address() {
 
 void Socket::_connect() {
   BOOST_ASSERT(!_is_open);
-  if (::connect(_sock_fd, (struct sockaddr *)&_address, sizeof(_address)) !=
-      0) {
+  int status =
+      ::connect(_sock_fd, (struct sockaddr *)&_address, sizeof(_address));
+  if (status != 0) {
     throw socket::SocketException(
         "Failed to connect to " + std::string(inet_ntoa(_address.sin_addr)) +
-        ":" + std::to_string(ntohs(_address.sin_port)));
+        ":" + std::to_string(ntohs(_address.sin_port)) +
+        ". Reason: " + strerror(errno));
   }
   _is_open = true;
 }
