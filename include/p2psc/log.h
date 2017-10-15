@@ -4,6 +4,7 @@
 #include <iomanip>
 #include <iostream>
 #include <sstream>
+#include <thread>
 
 namespace p2psc {
 namespace {
@@ -44,7 +45,8 @@ public:
     std::cout << stream_string << std::endl;
   }
   std::ostringstream &get() {
-    _stream << current_time() << " " << level_strings[_level] << "\t"
+    _stream << current_time() << " " << level_strings[_level] << " "
+            << "(" << std::this_thread::get_id() << ")\t"
             << _file.filename().string() << ":" << _line << ":\t";
     return _stream;
   }
