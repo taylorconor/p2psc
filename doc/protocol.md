@@ -71,14 +71,32 @@ peer which registered with the Mediator _first_.
 ### Peer handshake
 Once the Client has proved its identity with the Mediator, the Mediator will
 attempt to connect it to it's desired Peer. This may not be immediate, as the
-Peer may not yet have advertised to the Mediator. The Client will listen
-indefinitely (or within some reasonably long timeout) for messages on the socket
-it created with the Mediator.
+Peer may not yet have advertised to the Mediator.
+
+<a id="a_peer-disconnect"></a>
+When both the Client and Peer are registered with the Mediator, the Mediator
+sends a `PeerDisconnect` message to the Peer:
+```
+{
+    'type': kMessageTypePeerDisconnect,
+    'version': [p2psc version],
+    'payload': {
+        'port': [uint16_t port number]
+    }
+}
+```
+
+This message lets the Peer know that it should close its connection with the
+Mediator and create a new socket bound to `port` to listen for a connection
+from the Client. `port` will in this case be the same port that the Peer used
+to communicate with the Mediator. Since the Peer was the active closer of its
+socket with the Mediator, the socket's state will be in `TIME_WAIT`, and so any
+firewall or NAT gateway should keep a port mapping to the Peers host machine
+active.
 
 <a id="a_peer-identification"></a>
-When both the Client and Peer are registered with the Mediator, the Mediator
-sends a `PeerIdentification` message to the Client which registered with the
-Mediator first:
+At the same time, the Mediator will send a `PeerIdentification` message to 
+the Client:
 ```
 {
     'type': kMessageTypePeerIdentification,
@@ -91,9 +109,9 @@ Mediator first:
 ```
 
 In this case, `ip` and `port` are the IP and port of the Peer as observed by the
-Mediator. The Peer should still be listening on that port for a
-`PeerIdentification` message from the Mediator; however it will not receive one.
-Instead, the Client will use the Peer's IP and port to send a `PeerChallenge`
+Mediator. The Peer will have received a `PeerDisconnect` message from the 
+Mediator and should now be listening on `port`. The Client will use the Peer's 
+IP and port from the `PeerIdentification` message to send a `PeerChallenge` 
 message to the Peer:
 ```
 {
