@@ -42,6 +42,7 @@ public:
     std::string stream_string = _stream.str();
     const auto end = stream_string.find_last_not_of("\n");
     stream_string.erase(end + 1);
+    std::lock_guard<std::mutex> guard(_mutex());
     std::cout << stream_string << std::endl;
   }
   std::ostringstream &get() {
@@ -54,6 +55,10 @@ public:
 private:
   Log(const Log &);
   Log &operator=(const Log &);
+  static std::mutex& _mutex() {
+    static std::mutex m;
+    return m;
+  }
 
   enum level _level;
   boost::filesystem::path _file;
