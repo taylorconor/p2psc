@@ -15,12 +15,18 @@ int create_socket_fd(u_int32_t port) {
     throw std::runtime_error("Failed to open socket");
   }
 
+  const int enable = 1;
+  if (setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &enable, sizeof(int)) < 0) {
+    throw new std::runtime_error("Failed to set SO_REUSEADDR");
+  }
+
   bzero((char *)&sock_addr, sizeof(sock_addr));
   sock_addr.sin_family = AF_INET;
   sock_addr.sin_addr.s_addr = inet_addr(local_ip.c_str());
   sock_addr.sin_port = htons(port);
   if (bind(sockfd, (struct sockaddr *)&sock_addr, sizeof(sock_addr)) < 0) {
-    throw std::runtime_error("ERROR on binding");
+    throw std::runtime_error("Failed to bind to port " + std::to_string(port) +
+                             ". Reason: " + strerror(errno));
   }
   return sockfd;
 }
