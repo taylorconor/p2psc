@@ -16,10 +16,9 @@ mediate the handshake. A Mediator specification is outlined in
 _**TODO: Mediator spec**_.
 
 ## Handshake
-A socket creation handshake happens in three stages; first, the Client registers
-with the Mediator. Then, the Mediator connects the Client to its desired Peer.
-Finally, the Client deregisters both itself and the Peer from the Mediator upon
-successful handshake.
+A socket creation handshake happens in two stages; first, the Client registers
+with the Mediator. Then, the Mediator facilitates the creation of a 
+connection between the Client and its desired Peer.
 
 ### Mediator handshake
 A Client advertises itself to the Mediator by sending an `Advertise` message:
@@ -35,15 +34,13 @@ A Client advertises itself to the Mediator by sending an `Advertise` message:
 ```
 
 The Mediator then attempts to verify the identity of the Client by sending an
-`AdvertiseChallenge` message. This message contains a `secret`, which will be
-used later during [Mediator deregistration](#mediator-deregistration):
+`AdvertiseChallenge` message:
 ```
 {
     'type': kMessageTypeAdvertiseChallenge,
     'version': [p2psc version],
     'payload': {
-        'encrypted_nonce': [Nonce encrypted with our_key],
-        'secret': [Nonce]
+        'encrypted_nonce': [Nonce encrypted with our_key]
     }
 }
 ```
@@ -148,39 +145,5 @@ Providing the `decrypted_nonce` is correct, the Client will reply with a
 }
 ```
 
-If this is accepted by the Peer, the Peer will send the Client the `secret` it
-obtained from the Mediator during the [Mediator handshake](#mediator-handshake).
-This allows the Client to prove to the Mediator that the Peer trusts the Client.
-It is sent in a `PeerSecret` message:
-```
-{
-    'type': kMessageTypePeerSecret,
-    'version': [p2psc version],
-    'payload': {
-        'secret': [Peer secret]
-    }
-}
-```
-
 the Peer handshake step is now complete, as both the Client and Peer are now
 able to communicate P2P.
-
-### Mediator deregistration
-<a id="a_deregister"></a>
-Once both the Peer and Client have accepted each others identity, the Client
-will send a `Deregister` message to the Mediator. This acknowledges the success
-of the Peer handshake, and prompts the Mediator to deregister both the Peer and
-Client:
-```
-{
-    'type': kMessageTypeDeregister,
-    'version': [p2psc version],
-    'payload': {
-        'secret': [Peer secret]
-    }
-}
-```
-
-This prompts the Mediator to remove all temporarily stored port/IP references to
-both the Client and the Peer. If either wish to create a new socket with another
-Peer, they will need to create a brand new handshake with the Mediator.

@@ -7,7 +7,6 @@
 #include <p2psc/message/message_util.h>
 #include <p2psc/message/peer_challenge_response.h>
 #include <p2psc/message/peer_response.h>
-#include <p2psc/message/peer_secret.h>
 #include <p2psc/socket/local_listening_socket.h>
 
 namespace p2psc {
@@ -54,14 +53,6 @@ _connect_as_client(MediatorConnection &mediator_connection,
       message::PeerResponse{decrypted_peer_nonce});
   message::send_and_log(socket, peer_response);
 
-  // receive peer secret
-  const auto peer_secret =
-      message::receive_and_log<message::PeerSecret>(socket);
-
-  // deregister this client from the mediator, using the peer's secret as
-  // proof of successful peer handshake
-  mediator_connection.deregister(peer_secret.format().payload.secret);
-
   return socket;
 }
 
@@ -98,11 +89,6 @@ _connect_as_peer(MediatorConnection &mediator_connection,
   if (peer_response.format().payload.decrypted_nonce != client_nonce) {
     throw std::runtime_error("PeerResponse: peer did not pass verification");
   }
-
-  // send peer secret
-  const auto peer_secret =
-      Message<message::PeerSecret>(message::PeerSecret{"potatoes"});
-  message::send_and_log(socket, peer_secret);
 
   return socket;
 }

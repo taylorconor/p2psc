@@ -76,8 +76,7 @@ void FakeMediator::_handle_connection(std::shared_ptr<Socket> session_socket) {
       crypto::RSA::from_public_key(advertise.format().payload.our_key);
   const auto advertise_challenge =
       Message<message::AdvertiseChallenge>(message::AdvertiseChallenge{
-          peer_pub_key->public_encrypt(std::to_string(nonce)),
-          "secret_banana"});
+          peer_pub_key->public_encrypt(std::to_string(nonce))});
   _send_and_log(session_socket, advertise_challenge);
   QUIT_IF_REQUESTED(advertise_challenge.format().type, _quit_after);
 

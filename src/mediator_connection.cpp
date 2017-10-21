@@ -5,7 +5,6 @@
 #include <p2psc/message/advertise.h>
 #include <p2psc/message/advertise_challenge.h>
 #include <p2psc/message/advertise_response.h>
-#include <p2psc/message/deregister.h>
 #include <p2psc/message/message_decoder.h>
 #include <p2psc/message/message_util.h>
 #include <p2psc/message/peer_identification.h>
@@ -27,7 +26,6 @@ void MediatorConnection::connect(const key::Keypair &our_keypair,
   // receive advertise challenge
   const auto advertise_challenge =
       message::receive_and_log<message::AdvertiseChallenge>(_socket);
-  _challenge_secret = advertise_challenge.format().payload.secret;
 
   std::string decrypted_nonce;
   try {
@@ -66,14 +64,6 @@ void MediatorConnection::connect(const key::Keypair &our_keypair,
                       << message::message_type_string(message_type) << ": "
                       << raw_message;
   }
-}
-
-void MediatorConnection::deregister(const std::string &secret) {
-  BOOST_ASSERT(_connected);
-  const auto deregister =
-      Message<message::Deregister>(message::Deregister{secret});
-  message::send_and_log(_socket, deregister);
-  _connected = false;
 }
 
 void MediatorConnection::close() { BOOST_ASSERT(_connected); }

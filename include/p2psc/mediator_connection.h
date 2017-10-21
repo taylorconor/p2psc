@@ -16,7 +16,6 @@ public:
   MediatorConnection(const Mediator &mediator);
 
   void connect(const key::Keypair &our_keypair, const Peer &peer);
-  void deregister(const std::string &);
   void close();
 
   bool has_punched_peer() const;
@@ -32,6 +31,5 @@ private:
   boost::optional<PunchedPeer> _punched_peer;
   boost::optional<message::PeerDisconnect> _peer_disconnect;
   std::shared_ptr<Socket> _socket;
-  std::string _challenge_secret;
 };
 }

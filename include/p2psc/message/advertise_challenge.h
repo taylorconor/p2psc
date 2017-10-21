@@ -11,7 +11,6 @@ namespace message {
 struct AdvertiseChallenge {
   static const MessageType type = kTypeAdvertiseChallenge;
   std::string encrypted_nonce;
-  std::string secret;
 };
 }
 }
@@ -23,7 +22,6 @@ template <> struct default_codec_t<p2psc::message::AdvertiseChallenge> {
     auto codec = codec::object<p2psc::message::AdvertiseChallenge>();
     codec.required("encrypted_nonce",
                    &p2psc::message::AdvertiseChallenge::encrypted_nonce);
-    codec.required("secret", &p2psc::message::AdvertiseChallenge::secret);
     return codec;
   }
 };

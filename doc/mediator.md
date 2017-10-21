@@ -21,10 +21,3 @@ includes the other Peer's observed IP and port in this message. Any timeout or
 other communication error observed by the Mediator is considered an error, and
 the Mediator will close its connection to both Peers involved in the Peer
 handshake in such an event.
-
-The Mediator now waits for the Peers to complete the handshake, and for the
-Client to acknowledge a successful handshake by completing
-[Mediator deregisration](protocol.md#mediator-deregistration). A reasonable
-wait timeout for a [`Deregister`](protocol.md#a_deregister) message should be
-used when implementing a Mediator. In the case of a timeout, the Mediator should
-close its connection to both Peers.

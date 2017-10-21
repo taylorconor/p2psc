@@ -19,7 +19,6 @@ add_library(p2psc
         include/p2psc/message/anonymous_message_format.h
         include/p2psc/message/advertise_challenge.h
         include/p2psc/message/advertise_response.h
-        include/p2psc/message/deregister.h
         include/p2psc/message/message_decoder.h
         include/p2psc/message/message_exception.h
         include/p2psc/message/message_format.h
@@ -29,7 +28,6 @@ add_library(p2psc
         include/p2psc/message/peer_disconnect.h
         include/p2psc/message/peer_identification.h
         include/p2psc/message/peer_response.h
-        include/p2psc/message/peer_secret.h
         include/p2psc/message/types.h
         include/p2psc/peer.h
         include/p2psc/punched_peer.h
