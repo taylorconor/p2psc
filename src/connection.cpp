@@ -5,6 +5,7 @@
 #include <p2psc/mediator_connection.h>
 #include <p2psc/message.h>
 #include <p2psc/message/message_util.h>
+#include <p2psc/message/peer_acknowledgement.h>
 #include <p2psc/message/peer_challenge_response.h>
 #include <p2psc/message/peer_response.h>
 #include <p2psc/socket/local_listening_socket.h>
@@ -53,6 +54,9 @@ _connect_as_client(MediatorConnection &mediator_connection,
       message::PeerResponse{decrypted_peer_nonce});
   message::send_and_log(socket, peer_response);
 
+  // receive peer acknowledgement
+  message::receive_and_log<message::PeerAcknowledgement>(socket);
+
   return socket;
 }
 
@@ -89,6 +93,11 @@ _connect_as_peer(MediatorConnection &mediator_connection,
   if (peer_response.format().payload.decrypted_nonce != client_nonce) {
     throw std::runtime_error("PeerResponse: peer did not pass verification");
   }
+
+  // send peer acknowledgement
+  const auto peer_acknowledgement =
+      Message<message::PeerAcknowledgement>(message::PeerAcknowledgement{});
+  message::send_and_log(socket, peer_acknowledgement);
 
   return socket;
 }

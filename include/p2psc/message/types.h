@@ -15,6 +15,7 @@ static const MessageType kTypePeerIdentification = 4;
 static const MessageType kTypePeerChallenge = 5;
 static const MessageType kTypePeerChallengeResponse = 6;
 static const MessageType kTypePeerResponse = 7;
+static const MessageType kTypePeerAcknowledgement = 8;
 
 inline std::string message_type_string(MessageType type) {
   switch (type) {
@@ -34,6 +35,8 @@ inline std::string message_type_string(MessageType type) {
     return "PeerChallengeResponse";
   case kTypePeerResponse:
     return "PeerResponse";
+  case kTypePeerAcknowledgement:
+    return "PeerAcknowledgement";
   default:
     return "Unknown (" + std::to_string(type) + ")";
   }

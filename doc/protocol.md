@@ -145,5 +145,16 @@ Providing the `decrypted_nonce` is correct, the Client will reply with a
 }
 ```
 
+If the Peer does not accept the Clients `PeerResponse`, it will close the
+socket. Otherwise, it will reply with a `PeerAcknowledgement` message:
+```
+{
+    'type': kMessageTypePeerAcknowledgement,
+    'version': [p2psc version],
+    'payload': {
+    }
+}
+```
+
 the Peer handshake step is now complete, as both the Client and Peer are now
 able to communicate P2P.
