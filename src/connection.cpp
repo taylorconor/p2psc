@@ -36,8 +36,7 @@ _connect_as_client(MediatorConnection &mediator_connection,
   const auto peer_challenge_response =
       message::receive_and_log<message::PeerChallengeResponse>(socket);
 
-  if (peer_challenge_response.format().payload.decrypted_nonce !=
-      encrypted_nonce) {
+  if (peer_challenge_response.format().payload.decrypted_nonce != nonce) {
     throw std::runtime_error(
         "PeerChallengeResponse: peer did not pass verification");
   }
@@ -53,7 +52,7 @@ _connect_as_client(MediatorConnection &mediator_connection,
   // send peer response
   const auto peer_response = Message<message::PeerResponse>(
       message::PeerResponse{decrypted_peer_nonce});
-  message::send_and_log(socket, peer_challenge);
+  message::send_and_log(socket, peer_response);
 
   // receive peer secret
   const auto peer_secret =
@@ -68,7 +67,7 @@ _connect_as_client(MediatorConnection &mediator_connection,
 
 std::shared_ptr<Socket>
 _connect_as_peer(MediatorConnection &mediator_connection,
-                 const key::Keypair &our_keypair) {
+                 const key::Keypair &our_keypair, const Peer &peer) {
   LOG(level::Debug) << "Attempting connection as Peer";
   // close mediator socket and create new socket to listen for peer challenge
   const auto socket_address = socket::SocketAddress(
@@ -79,10 +78,33 @@ _connect_as_peer(MediatorConnection &mediator_connection,
   const auto listening_socket = socket::LocalListeningSocket(
       mediator_connection.get_peer_disconnect().port);
   const auto socket = listening_socket.accept();
+
+  // receive peer challenge
   const auto peer_challenge =
       message::receive_and_log<message::PeerChallenge>(socket);
+  const auto decrypted_nonce = our_keypair.private_decrypt(
+      peer_challenge.format().payload.encrypted_nonce);
 
-  return nullptr;
+  // send peer challenge response
+  const auto client_nonce = generate_nonce();
+  const auto encrypted_client_nonce = peer.public_key.encrypt(client_nonce);
+  const auto peer_challenge_response = Message<message::PeerChallengeResponse>(
+      message::PeerChallengeResponse{encrypted_client_nonce, decrypted_nonce});
+  message::send_and_log(socket, peer_challenge_response);
+
+  // receive peer response
+  const auto peer_response =
+      message::receive_and_log<message::PeerResponse>(socket);
+  if (peer_response.format().payload.decrypted_nonce != client_nonce) {
+    throw std::runtime_error("PeerResponse: peer did not pass verification");
+  }
+
+  // send peer secret
+  const auto peer_secret =
+      Message<message::PeerSecret>(message::PeerSecret{"potatoes"});
+  message::send_and_log(socket, peer_secret);
+
+  return socket;
 }
 }
 
@@ -125,7 +147,7 @@ std::shared_ptr<Socket> Connection::_connect(const key::Keypair &our_keypair,
   if (mediator_connection.has_punched_peer()) {
     return _connect_as_client(mediator_connection, our_keypair);
   } else if (mediator_connection.has_peer_disconnect()) {
-    return _connect_as_peer(mediator_connection, our_keypair);
+    return _connect_as_peer(mediator_connection, our_keypair, peer);
   } else {
     throw std::runtime_error("No PunchedPeer or PeerChallenge");
   }
