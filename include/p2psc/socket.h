@@ -20,6 +20,7 @@ public:
   void send(const std::string &);
   std::string receive();
   socket::SocketAddress get_socket_address();
+  void close();
 
 private:
   Socket(const Socket &) = delete;

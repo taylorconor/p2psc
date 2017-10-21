@@ -26,6 +26,7 @@ add_library(p2psc
         include/p2psc/message/message_util.h
         include/p2psc/message/peer_challenge.h
         include/p2psc/message/peer_challenge_response.h
+        include/p2psc/message/peer_disconnect.h
         include/p2psc/message/peer_identification.h
         include/p2psc/message/peer_response.h
         include/p2psc/message/peer_secret.h
@@ -33,12 +34,14 @@ add_library(p2psc
         include/p2psc/peer.h
         include/p2psc/punched_peer.h
         include/p2psc/socket.h
+        include/p2psc/socket/local_listening_socket.h
         include/p2psc/socket/socket_address.h
         include/p2psc/socket/socket_exception.h
         include/p2psc/version.h
 
         src/connection.cpp
         src/keypair.cpp
+        src/local_listening_socket.cpp
         src/mediator_connection.cpp
         src/public_key.cpp
         src/rsa.cpp

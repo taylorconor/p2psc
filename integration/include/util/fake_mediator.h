@@ -1,10 +1,10 @@
 #pragma once
 
 #include <include/util/id_to_address_store.h>
-#include <include/util/local_listening_socket.h>
 #include <p2psc/mediator.h>
 #include <p2psc/message.h>
 #include <p2psc/message/types.h>
+#include <p2psc/socket/local_listening_socket.h>
 #include <thread>
 #include <vector>
 
@@ -28,7 +28,7 @@ public:
   std::vector<std::string> get_sent_messages() const;
 
 private:
-  LocalListeningSocket _socket;
+  socket::LocalListeningSocket _socket;
   p2psc::Mediator _mediator;
   IdToAddressStore _id_to_address_store;
   bool _is_running;
@@ -37,9 +37,14 @@ private:
   std::vector<std::thread> _handler_pool;
   std::vector<std::string> _received_messages;
   std::vector<std::string> _sent_messages;
+  std::condition_variable _cv;
+  std::mutex _mutex;
+  std::unordered_set<socket::SocketAddress> _completed_disconnects;
 
   void _run();
   void _handle_connection(std::shared_ptr<Socket> session_socket);
+  void _add_to_disconnects(const socket::SocketAddress &address);
+  void _wait_for_disconnect(const socket::SocketAddress &address);
   template <class T>
   void _send_and_log(std::shared_ptr<Socket> socket, const Message<T> &message);
   template <class T>

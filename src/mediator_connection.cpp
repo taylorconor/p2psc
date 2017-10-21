@@ -19,7 +19,6 @@ void MediatorConnection::connect(const key::Keypair &our_keypair,
                                  const Peer &peer) {
   BOOST_ASSERT(!_connected);
   _socket = std::make_shared<Socket>(_mediator.socket_address);
-
   // send advertise
   const auto advertise = Message<message::Advertise>(message::Advertise{
       our_keypair.get_serialised_public_key(), peer.public_key.serialise()});
@@ -56,11 +55,11 @@ void MediatorConnection::connect(const key::Keypair &our_keypair,
         peer_identification.payload.ip, peer_identification.payload.port);
     _punched_peer = PunchedPeer(peer, socket_address);
     _connected = true;
-  } else if (message_type == message::kTypePeerChallenge) {
-    LOG(level::Debug) << "Received PeerChallenge: " << raw_message;
-    const auto challenge_format =
-        message::decode<message::PeerChallenge>(raw_message);
-    _peer_challenge = challenge_format.payload;
+  } else if (message_type == message::kTypePeerDisconnect) {
+    LOG(level::Debug) << "Received PeerDisconnect: " << raw_message;
+    const auto peer_disconnect =
+        message::decode<message::PeerDisconnect>(raw_message);
+    _peer_disconnect = peer_disconnect.payload;
     _connected = true;
   } else {
     LOG(level::Error) << "Received unexpected message type: "
@@ -77,6 +76,8 @@ void MediatorConnection::deregister(const std::string &secret) {
   _connected = false;
 }
 
+void MediatorConnection::close() { BOOST_ASSERT(_connected); }
+
 bool MediatorConnection::has_punched_peer() const {
   return _punched_peer.is_initialized();
 }
@@ -86,18 +87,13 @@ PunchedPeer MediatorConnection::get_punched_peer() const {
   return *_punched_peer;
 }
 
-bool MediatorConnection::has_peer_challenge() const {
-  return _peer_challenge.is_initialized();
+bool MediatorConnection::has_peer_disconnect() const {
+  return _peer_disconnect.is_initialized();
 }
 
-message::PeerChallenge MediatorConnection::get_peer_challenge() const {
-  BOOST_ASSERT(_peer_challenge);
-  return *_peer_challenge;
-}
-
-std::string MediatorConnection::get_challenge_secret() const {
-  BOOST_ASSERT(_peer_challenge);
-  return _challenge_secret;
+message::PeerDisconnect MediatorConnection::get_peer_disconnect() const {
+  BOOST_ASSERT(_peer_disconnect);
+  return *_peer_disconnect;
 }
 
 std::shared_ptr<Socket> MediatorConnection::get_socket() const {

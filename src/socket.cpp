@@ -69,6 +69,15 @@ socket::SocketAddress Socket::get_socket_address() {
   return socket::SocketAddress(ip_str, _address.sin_port);
 }
 
+void Socket::close() {
+  BOOST_ASSERT(_is_open);
+  if (::close(_sock_fd) != 0) {
+    throw socket::SocketException("Failed to close socket. Reason: " +
+                                  std::string(strerror(errno)));
+  }
+  _is_open = false;
+}
+
 void Socket::_connect() {
   BOOST_ASSERT(!_is_open);
   int status =

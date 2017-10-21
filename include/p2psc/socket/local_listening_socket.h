@@ -6,15 +6,15 @@
 #include <string>
 
 namespace p2psc {
-namespace integration {
-namespace util {
+namespace socket {
 
 class LocalListeningSocket {
 public:
   LocalListeningSocket();
+  LocalListeningSocket(uint16_t port);
   ~LocalListeningSocket();
 
-  std::shared_ptr<Socket> accept();
+  std::shared_ptr<Socket> accept() const;
   void close();
 
   socket::SocketAddress get_socket_address();
@@ -23,6 +23,5 @@ private:
   int _sockfd;
   uint16_t _port;
 };
-}
 }
 }
