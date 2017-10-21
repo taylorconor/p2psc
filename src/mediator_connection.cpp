@@ -17,6 +17,8 @@ MediatorConnection::MediatorConnection(const Mediator &mediator)
 void MediatorConnection::connect(const key::Keypair &our_keypair,
                                  const Peer &peer) {
   BOOST_ASSERT(!_connected);
+  LOG(level::Info) << "Connecting to Mediator (on " << _mediator.socket_address
+                   << ")";
   _socket = std::make_shared<Socket>(_mediator.socket_address);
   // send advertise
   const auto advertise = Message<message::Advertise>(message::Advertise{

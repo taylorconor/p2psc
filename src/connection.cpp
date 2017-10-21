@@ -20,7 +20,8 @@ std::string generate_nonce() {
 std::shared_ptr<Socket>
 _connect_as_client(MediatorConnection &mediator_connection,
                    const key::Keypair &our_keypair) {
-  LOG(level::Debug) << "Attempting connection as Client";
+  LOG(level::Info) << "Attempting connection as Client (to "
+                   << mediator_connection.get_punched_peer().address << ")";
   // close mediator socket and attempt to connect to the peer specified in the
   // punched_peer.
   mediator_connection.close_socket();
@@ -66,10 +67,11 @@ _connect_as_client(MediatorConnection &mediator_connection,
 std::shared_ptr<Socket>
 _connect_as_peer(MediatorConnection &mediator_connection,
                  const key::Keypair &our_keypair, const Peer &peer) {
-  LOG(level::Debug) << "Attempting connection as Peer";
-  // close mediator socket and create new socket to listen for peer challenge
   const auto socket_address = socket::SocketAddress(
       socket::local_ip, mediator_connection.get_peer_disconnect().port);
+  LOG(level::Info) << "Attempting connection as Peer (on " << socket_address
+                   << ")";
+  // close mediator socket and create new socket to listen for peer challenge
   LOG(level::Debug) << "Closing mediator socket to begin listening on "
                     << socket_address;
   mediator_connection.close_socket();
