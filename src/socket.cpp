@@ -66,7 +66,7 @@ std::string Socket::receive() {
 socket::SocketAddress Socket::get_socket_address() {
   char ip_str[INET_ADDRSTRLEN];
   inet_ntop(AF_INET, &(_address.sin_addr), ip_str, INET_ADDRSTRLEN);
-  return socket::SocketAddress(ip_str, _address.sin_port);
+  return socket::SocketAddress(ip_str, ntohs(_address.sin_port));
 }
 
 void Socket::close() {
