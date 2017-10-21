@@ -66,7 +66,10 @@ void MediatorConnection::connect(const key::Keypair &our_keypair,
   }
 }
 
-void MediatorConnection::close() { BOOST_ASSERT(_connected); }
+void MediatorConnection::close_socket() {
+  BOOST_ASSERT(_connected);
+  _socket->close();
+}
 
 bool MediatorConnection::has_punched_peer() const {
   return _punched_peer.is_initialized();

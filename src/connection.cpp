@@ -21,6 +21,9 @@ std::shared_ptr<Socket>
 _connect_as_client(MediatorConnection &mediator_connection,
                    const key::Keypair &our_keypair) {
   LOG(level::Debug) << "Attempting connection as Client";
+  // close mediator socket and attempt to connect to the peer specified in the
+  // punched_peer.
+  mediator_connection.close_socket();
   std::shared_ptr<Socket> socket =
       std::make_shared<Socket>(mediator_connection.get_punched_peer().address);
 
@@ -69,7 +72,7 @@ _connect_as_peer(MediatorConnection &mediator_connection,
       socket::local_ip, mediator_connection.get_peer_disconnect().port);
   LOG(level::Debug) << "Closing mediator socket to begin listening on "
                     << socket_address;
-  mediator_connection.close();
+  mediator_connection.close_socket();
   const auto listening_socket = socket::LocalListeningSocket(
       mediator_connection.get_peer_disconnect().port);
   const auto socket = listening_socket.accept();
