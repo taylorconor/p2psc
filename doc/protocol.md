@@ -1,27 +1,28 @@
 # Protocol
-This document describes the protocol used to create a socket between two peers
+This document describes the protocol used to create a socket between two Peers
 using `p2psc`. All messages in the `p2psc` protocol are encoded in JSON format,
 and consist of a message type, a protocol version, and a payload.
 
 ## Initialisation
-Before attempting to create a socket between two peers using `p2psc`, a
-`Keypair` for both peers must be either created or initialised. This is done
-independently by both peers. The protocol assumes that the connecting peer, (the
-_Client_), is aware of the other peer's (the _Peer_) public key. The keypairs
+Before attempting to create a socket between two Peers using `p2psc`, a
+`Keypair` for both Peers must be either created or initialised. This is done
+independently by both Peers. The protocol assumes that the connecting Peer, (the
+_Client_), is aware of the other Peer's (the _Peer_) public key. The keypairs
 are used so peers can prove their identities to each other, and can encrypt
 their communication.
 
-We also assume the presence of a Mediator, a server trusted by both peers, to
+We also assume the presence of a Mediator, a server trusted by both Peers, to
 mediate the handshake. A Mediator specification is outlined in
 _**TODO: Mediator spec**_.
 
 ## Handshake
 A socket creation handshake happens in two stages; first, the Client registers
-with the Mediator. Then, the Mediator facilitates the creation of a 
-connection between the Client and its desired Peer.
+with the Mediator (the _Mediator Handshake_). Then, the Mediator facilitates the
+creation of a connection between the Client and its desired Peer (the _Peer 
+Handshake_).
 
 ### Mediator handshake
-A Client advertises itself to the Mediator by sending an `Advertise` message:
+A Peer advertises itself to the Mediator by sending an `Advertise` message:
 ```
 {
     'type': kMessageTypeAdvertise,
@@ -33,8 +34,9 @@ A Client advertises itself to the Mediator by sending an `Advertise` message:
 }
 ```
 
-The Mediator then attempts to verify the identity of the Client by sending an
-`AdvertiseChallenge` message:
+The Mediator will then return one of three message types:
+- If the Mediator considers the `Advertise` message valid, it will attempt to 
+verify the identity of the Peer by sending an `AdvertiseChallenge` message:
 ```
 {
     'type': kMessageTypeAdvertiseChallenge,
@@ -45,9 +47,37 @@ The Mediator then attempts to verify the identity of the Client by sending an
 }
 ```
 
-Finally, the Client proves its identity to the Mediator by replying with an
+- If the `Advertise` message is errenous (for example if the Peer sends an 
+`Advertise` with a `version` greater than that supported by the Mediator) an
+`AdvertiseAbort` message will be sent to the Peer, along with a reason for 
+the abort:
+```
+{
+    'type': kMessageTypeAdvertiseAbort,
+    'version': [p2psc version],
+    'payload': {
+        'reason': [String, reason for aborting the Mediator handshake]
+    }
+}
+```
+
+- If the Mediator wants the Peer to retry the `Advertise` message (for example 
+if the `Advertise` came on a port that the Mediator determines the Peer will be
+unable to bind to during the Peer Handshake) then an `AdvertiseRetry` message
+is returned to the Peer, with a reason for the retry request:
+```
+{
+    'type': kMessageTypeAdvertiseRetry,
+    'version': [p2psc version],
+    'payload': {
+        'reason': [String, reason for requesting a retry]
+    }
+}
+```
+
+Finally, the Peer proves its identity to the Mediator by replying with an
 `AdvertiseResponse` containing `nonce`, the `encrypted_nonce` decrypted using
-the Client's private key:
+the Peer's private key:
 ```
 {
     'type': kMessageTypeAdvertiseResponse,
@@ -60,15 +90,14 @@ the Client's private key:
 
 The Mediator handles an invalid `AdvertiseResponse` by closing the socket.
 
-Note that the words Peer and Client depend on perspective. Both the Peer and
-Client will at some point in time independently complete a Mediator handshake
-as Clients. During Peer handshake, the Mediator considers the Client to be the
-peer which registered with the Mediator _first_.
-
 ### Peer handshake
-Once the Client has proved its identity with the Mediator, the Mediator will
-attempt to connect it to it's desired Peer. This may not be immediate, as the
-Peer may not yet have advertised to the Mediator.
+Once the Peer has proved its identity with the Mediator, the Mediator will
+attempt to connect it to its specified Peer. This may not be immediate, as the
+specified Peer may not yet have advertised to the Mediator.
+
+The Peer who registers with the Mediator _first_ is considered to be the 
+_Client_ for the Peer Handshake, while the other Peer is considered to be the
+_Peer_.
 
 <a id="a_peer-disconnect"></a>
 When both the Client and Peer are registered with the Mediator, the Mediator
@@ -120,8 +149,9 @@ message to the Peer:
 }
 ```
 
-Upon receipt of this message, the Peer verifies it's own identity and attempts
-to verify the identity of the Client by replying with a `PeerChallengeResponse`:
+Upon receipt of this message, the Peer verifies its own identity to the Client,
+and attempts to verify the identity of the Client by replying with a 
+`PeerChallengeResponse`:
 ```
 {
     'type': kMessageTypePeerChallengeResponse,
@@ -133,7 +163,7 @@ to verify the identity of the Client by replying with a `PeerChallengeResponse`:
 }
 ```
 
-Providing the `decrypted_nonce` is correct, the Client will reply with a
+Provided that the `decrypted_nonce` is correct, the Client will reply with a
 `PeerResponse` message:
 ```
 {
@@ -156,5 +186,5 @@ socket. Otherwise, it will reply with a `PeerAcknowledgement` message:
 }
 ```
 
-the Peer handshake step is now complete, as both the Client and Peer are now
-able to communicate P2P.
+The Peer Handshake step is now complete, as both the Client and Peer are able to
+communicate P2P.
