@@ -26,7 +26,7 @@ std::string current_time() {
 
 enum level { Error, Warning, Info, Debug };
 
-#define REPORTING_LEVEL level::Debug
+#define REPORTING_LEVEL level::Info
 
 #define LOG(level)                                                             \
   if (level > REPORTING_LEVEL)                                                 \
@@ -55,7 +55,7 @@ public:
 private:
   Log(const Log &);
   Log &operator=(const Log &);
-  static std::mutex& _mutex() {
+  static std::mutex &_mutex() {
     static std::mutex m;
     return m;
   }
