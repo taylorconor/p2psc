@@ -12,6 +12,9 @@
 
 namespace p2psc {
 namespace {
+
+const auto backoff_duration_ms = std::chrono::milliseconds(10);
+
 std::string generate_nonce() {
   std::srand(std::time(0));
   return std::to_string(std::rand());
@@ -22,11 +25,24 @@ _connect_as_client(MediatorConnection &mediator_connection,
                    const key::Keypair &our_keypair) {
   LOG(level::Info) << "Attempting connection as Client (to "
                    << mediator_connection.get_punched_peer().address << ")";
-  // close mediator socket and attempt to connect to the peer specified in the
+  // close mediator socket and attempt to connect to the Peer specified in the
   // punched_peer.
   mediator_connection.close_socket();
-  std::shared_ptr<Socket> socket =
-      std::make_shared<Socket>(mediator_connection.get_punched_peer().address);
+  std::shared_ptr<Socket> socket;
+  // it's possible that the Peer hasn't had time to create its listening
+  // socket yet, so if the connection fails we retry again once.
+  try {
+    socket = std::make_shared<Socket>(
+        mediator_connection.get_punched_peer().address);
+  } catch (const socket::SocketException &e) {
+    LOG(level::Warning) << "Failed to connect to "
+                        << mediator_connection.get_punched_peer().address
+                        << ", retrying in " << backoff_duration_ms.count()
+                        << "ms. Reason: " << e.what();
+    std::this_thread::sleep_for(backoff_duration_ms);
+    socket = std::make_shared<Socket>(
+        mediator_connection.get_punched_peer().address);
+  }
 
   // send peer challenge
   const std::string nonce = generate_nonce();
@@ -124,6 +140,9 @@ void Connection::_handle_connection(const key::Keypair &our_keypair,
                                     const Callback &callback) {
   try {
     std::shared_ptr<Socket> socket = _connect(our_keypair, peer, mediator);
+    LOG(level::Info) << "Successfully created socket (on "
+                     << socket->get_socket_address() << ")";
+    callback(socket);
   } catch (const socket::SocketException &e) {
     LOG(level::Error) << "Failed to connect to peer: " << e.what();
     // TODO: make an exception class specifically designed for returning an
