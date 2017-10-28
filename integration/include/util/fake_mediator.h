@@ -1,6 +1,6 @@
 #pragma once
 
-#include <include/util/id_to_address_store.h>
+#include <include/util/key_to_identifier_store.h>
 #include <p2psc/mediator.h>
 #include <p2psc/message.h>
 #include <p2psc/message/types.h>
@@ -30,7 +30,7 @@ public:
 private:
   socket::LocalListeningSocket _socket;
   p2psc::Mediator _mediator;
-  IdToAddressStore _id_to_address_store;
+  KeyToIdentifierStore _key_to_identifier_store;
   bool _is_running;
   message::MessageType _quit_after;
   std::thread _worker_thread;
@@ -40,6 +40,7 @@ private:
   std::condition_variable _cv;
   std::mutex _mutex;
   std::unordered_set<socket::SocketAddress> _completed_disconnects;
+  std::uint8_t _protocol_version;
 
   void _run();
   void _handle_connection(std::shared_ptr<Socket> session_socket);

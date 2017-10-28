@@ -23,7 +23,6 @@ namespace json {
 template <class T> struct default_codec_t<p2psc::message::MessageFormat<T>> {
   static codec::object_t<p2psc::message::MessageFormat<T>> codec() {
     auto codec = codec::object<p2psc::message::MessageFormat<T>>();
-    codec.required("version", &p2psc::message::MessageFormat<T>::version);
     codec.required("type", &p2psc::message::MessageFormat<T>::type);
     codec.required("payload", &p2psc::message::MessageFormat<T>::payload);
     return codec;

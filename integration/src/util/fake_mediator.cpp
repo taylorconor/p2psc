@@ -2,6 +2,7 @@
 #include <p2psc/crypto/rsa.h>
 #include <p2psc/log.h>
 #include <p2psc/message/advertise.h>
+#include <p2psc/message/advertise_abort.h>
 #include <p2psc/message/advertise_challenge.h>
 #include <p2psc/message/advertise_response.h>
 #include <p2psc/message/message_decoder.h>
@@ -19,10 +20,11 @@ namespace p2psc {
 namespace integration {
 namespace util {
 
-FakeMediator::FakeMediator() : _mediator(_socket.get_socket_address()) {}
+FakeMediator::FakeMediator()
+    : _mediator(_socket.get_socket_address()), _protocol_version(kVersion) {}
 
 FakeMediator::FakeMediator(const p2psc::Mediator &mediator)
-    : _mediator(mediator) {}
+    : _mediator(mediator), _protocol_version(kVersion) {}
 
 FakeMediator::~FakeMediator() {
   if (_is_running) {
@@ -68,6 +70,18 @@ void FakeMediator::_handle_connection(std::shared_ptr<Socket> session_socket) {
   const auto advertise = _receive_and_log<message::Advertise>(session_socket);
   QUIT_IF_REQUESTED(advertise.format().type, _quit_after);
 
+  if (advertise.format().payload.version < _protocol_version) {
+    const auto advertise_abort =
+        Message<message::AdvertiseAbort>(message::AdvertiseAbort{
+            "Required protocol version: " + std::to_string(_protocol_version)});
+    _send_and_log(session_socket, advertise_abort);
+    LOG(level::Error) << "Received protocol version "
+                      << advertise.format().payload.version
+                      << ", require version " << _protocol_version;
+    QUIT_IF_REQUESTED(advertise_abort.format().type, _quit_after);
+    return;
+  }
+
   /*
    * AdvertiseChallenge
    */
@@ -88,16 +102,18 @@ void FakeMediator::_handle_connection(std::shared_ptr<Socket> session_socket) {
   QUIT_IF_REQUESTED(advertise_response.format().type, _quit_after);
 
   const auto maybe_peer =
-      _id_to_address_store.get(advertise.format().payload.their_key);
+      _key_to_identifier_store.get(advertise.format().payload.their_key);
   if (!maybe_peer) {
     // In this case, this peer is the Client, and we are waiting for the Peer to
     // come online. We store the Clients address and wait for the other peer to
     // come online so we can send a PeerIdentification back to the Client.
-    _id_to_address_store.put(advertise.format().payload.our_key,
-                             session_socket->get_socket_address());
+    _key_to_identifier_store.put(
+        advertise.format().payload.our_key,
+        PeerIdentifier(session_socket->get_socket_address(),
+                       advertise.format().payload.version));
     // Timeout after 2 seconds
-    const auto awaited_peer =
-        _id_to_address_store.await(advertise.format().payload.their_key, 2000);
+    const auto awaited_peer = _key_to_identifier_store.await(
+        advertise.format().payload.their_key, 2000);
     if (!awaited_peer) {
       // if we never receive an awaited peer, we can't continue
       LOG(level::Error) << "Never received Advertise from peer:" << std::endl
@@ -108,23 +124,28 @@ void FakeMediator::_handle_connection(std::shared_ptr<Socket> session_socket) {
     // We need to make sure we don't send a PeerIdentification to the Client
     // until after the Peer has received its PeerDisconnect, otherwise we can't
     // guarantee that the Peer will be listening for incoming requests
-    _wait_for_disconnect(*awaited_peer);
+    _wait_for_disconnect(awaited_peer->socket_address);
 
     /*
      * PeerIdentification
      */
-    const auto peer_identification = Message<message::PeerIdentification>(
-        message::PeerIdentification{awaited_peer->ip(), awaited_peer->port()});
+    const auto peer_identification =
+        Message<message::PeerIdentification>(message::PeerIdentification{
+            awaited_peer->version, awaited_peer->socket_address.ip(),
+            awaited_peer->socket_address.port()});
     _send_and_log(session_socket, peer_identification);
     QUIT_IF_REQUESTED(peer_identification.format().type, _quit_after);
   } else {
     // In this case, this peer is the Peer, since the Client has already come
     // online. The Mediator is done with this peer now.
-    _id_to_address_store.put(advertise.format().payload.our_key,
-                             session_socket->get_socket_address());
+    _key_to_identifier_store.put(
+        advertise.format().payload.our_key,
+        PeerIdentifier(session_socket->get_socket_address(),
+                       advertise.format().payload.version));
     LOG(level::Debug) << "Registered Peer with address: "
                       << session_socket->get_socket_address()
-                      << ". Client is already registered as: " << *maybe_peer;
+                      << ". Client is already registered as: "
+                      << maybe_peer->socket_address;
 
     /*
      * PeerDisconnect
@@ -150,13 +171,12 @@ void FakeMediator::_add_to_disconnects(const socket::SocketAddress &address) {
 void FakeMediator::_wait_for_disconnect(const socket::SocketAddress &address) {
   std::unique_lock<std::mutex> lock(_mutex);
   _cv.wait(lock, [&]() {
-    return _completed_disconnects.find(address) !=
-           _completed_disconnects.end();
+    return _completed_disconnects.find(address) != _completed_disconnects.end();
   });
   _completed_disconnects.erase(address);
 }
 
-template<class T>
+template <class T>
 void FakeMediator::_send_and_log(std::shared_ptr<Socket> socket,
                                  const Message<T> &message) {
   const auto json = encode(message.format());
@@ -168,7 +188,7 @@ void FakeMediator::_send_and_log(std::shared_ptr<Socket> socket,
                     << socket->get_socket_address().port() << ": " << json;
 }
 
-template<class T>
+template <class T>
 Message<T> FakeMediator::_receive_and_log(std::shared_ptr<Socket> socket) {
   const auto raw_message = socket->receive();
   auto message = message::decode<T>(raw_message);

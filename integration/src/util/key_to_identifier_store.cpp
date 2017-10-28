@@ -1,4 +1,4 @@
-#include <include/util/id_to_address_store.h>
+#include <include/util/key_to_identifier_store.h>
 
 namespace p2psc {
 namespace integration {
@@ -10,33 +10,32 @@ long long int current_time_ms() {
 }
 }
 
-void IdToAddressStore::put(const std::string &id,
-                           const socket::SocketAddress &socket_address) {
+void KeyToIdentifierStore::put(const std::string &id,
+                               const PeerIdentifier &peer_identifier) {
   {
     std::lock_guard<std::mutex> guard(_mutex);
-    _store.insert(
-        std::pair<std::string, socket::SocketAddress>(id, socket_address));
+    _store.insert(std::pair<std::string, PeerIdentifier>(id, peer_identifier));
   }
   _cv.notify_all();
 }
 
-boost::optional<socket::SocketAddress>
-IdToAddressStore::get(const std::string &id) {
+boost::optional<PeerIdentifier>
+KeyToIdentifierStore::get(const std::string &id) {
   std::lock_guard<std::mutex> guard(_mutex);
   return _get(id);
 }
 
-boost::optional<socket::SocketAddress>
-IdToAddressStore::await(const std::string &id, uint64_t ms) {
+boost::optional<PeerIdentifier>
+KeyToIdentifierStore::await(const std::string &id, uint64_t ms) {
   std::unique_lock<std::mutex> lock(_mutex);
 
   const auto start_ms = current_time_ms();
   std::chrono::milliseconds wait_ms(ms);
   do {
     _cv.wait_for(lock, wait_ms);
-    const auto address = _get(id);
-    if (address) {
-      return address;
+    const auto identifier = _get(id);
+    if (identifier) {
+      return identifier;
     }
     wait_ms -= std::chrono::milliseconds(current_time_ms() - start_ms);
   } while (wait_ms.count() > 0);
@@ -45,8 +44,8 @@ IdToAddressStore::await(const std::string &id, uint64_t ms) {
   return boost::none;
 }
 
-boost::optional<socket::SocketAddress>
-IdToAddressStore::_get(const std::string &id) {
+boost::optional<PeerIdentifier>
+KeyToIdentifierStore::_get(const std::string &id) {
   try {
     return _store.at(id);
   } catch (std::out_of_range e) {

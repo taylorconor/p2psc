@@ -28,6 +28,16 @@ _connect_as_client(MediatorConnection &mediator_connection,
   // close mediator socket and attempt to connect to the Peer specified in the
   // punched_peer.
   mediator_connection.close_socket();
+
+  const auto punched_peer = mediator_connection.get_punched_peer();
+  if (punched_peer.version != kVersion) {
+    LOG(level::Error) << "Peer has incompatible protocol version "
+                      << punched_peer.version << ". Require " << kVersion;
+    throw std::runtime_error("Incompatible protocol version (" +
+                             std::to_string(punched_peer.version) +
+                             " != " + std::to_string(kVersion) + ")");
+  }
+
   std::shared_ptr<Socket> socket;
   // it's possible that the Peer hasn't had time to create its listening
   // socket yet, so if the connection fails we retry again once.

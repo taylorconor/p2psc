@@ -10,6 +10,7 @@ namespace message {
 
 struct Advertise {
   static const MessageType type = kTypeAdvertise;
+  std::uint8_t version;
   std::string our_key;
   std::string their_key;
 };
@@ -21,6 +22,7 @@ namespace json {
 template <> struct default_codec_t<p2psc::message::Advertise> {
   static codec::object_t<p2psc::message::Advertise> codec() {
     auto codec = codec::object<p2psc::message::Advertise>();
+    codec.required("version", &p2psc::message::Advertise::version);
     codec.required("our_key", &p2psc::message::Advertise::our_key);
     codec.required("their_key", &p2psc::message::Advertise::their_key);
     return codec;

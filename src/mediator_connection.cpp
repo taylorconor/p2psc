@@ -31,8 +31,9 @@ void MediatorConnection::connect(const key::Keypair &our_keypair,
   int advertise_retries = 0;
   do {
     // send advertise
-    const auto advertise = Message<message::Advertise>(message::Advertise{
-        our_keypair.get_serialised_public_key(), peer.public_key.serialise()});
+    const auto advertise = Message<message::Advertise>(
+        message::Advertise{kVersion, our_keypair.get_serialised_public_key(),
+                           peer.public_key.serialise()});
     message::send_and_log(_socket, advertise);
 
     // receive some response from the mediator
@@ -89,7 +90,8 @@ void MediatorConnection::connect(const key::Keypair &our_keypair,
         message::decode<message::PeerIdentification>(raw_message);
     const auto socket_address = socket::SocketAddress(
         peer_identification.payload.ip, peer_identification.payload.port);
-    _punched_peer = PunchedPeer(peer, socket_address);
+    _punched_peer =
+        PunchedPeer(peer, socket_address, peer_identification.payload.version);
     _connected = true;
   } else if (message_type == message::kTypePeerDisconnect) {
     LOG(level::Debug) << "Received PeerDisconnect: " << raw_message;

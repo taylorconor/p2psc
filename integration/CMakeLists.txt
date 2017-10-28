@@ -7,13 +7,14 @@ set(CMAKE_CXX_FLAGS
 add_executable(p2psc_integration_test
         include/util/client.h
         include/util/fake_mediator.h
-        include/util/id_to_address_store.h
+        include/util/key_to_identifier_store.h
 
         test.cpp
         src/client_it.cpp
         src/util/client.cpp
         src/util/fake_mediator.cpp
-        src/util/id_to_address_store.cpp)
+        src/util/key_to_identifier_store.cpp
+        include/util/peer_identifier.h)
 
 target_link_libraries(p2psc_integration_test
         p2psc
