@@ -10,6 +10,9 @@
 #include <unistd.h>
 
 namespace p2psc {
+namespace socket {
+const int RECV_BUF_SIZE = 1024;
+}
 
 class Socket {
 public:

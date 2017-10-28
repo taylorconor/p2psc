@@ -17,7 +17,7 @@ public:
   std::shared_ptr<Socket> accept() const;
   void close();
 
-  socket::SocketAddress get_socket_address();
+  socket::SocketAddress get_socket_address() const;
 
 private:
   int _sockfd;

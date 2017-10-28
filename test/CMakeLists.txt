@@ -9,7 +9,8 @@ add_executable(p2psc_test
 
         p2psc/connection_test.cpp
         p2psc/message_test.cpp
-        p2psc/rsa_test.cpp)
+        p2psc/rsa_test.cpp
+        p2psc/socket_test.cpp)
 
 target_link_libraries(p2psc_test
         p2psc

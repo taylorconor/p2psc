@@ -63,7 +63,7 @@ std::shared_ptr<Socket> LocalListeningSocket::accept() const {
 
 void LocalListeningSocket::close() { ::close(_sockfd); }
 
-socket::SocketAddress LocalListeningSocket::get_socket_address() {
+socket::SocketAddress LocalListeningSocket::get_socket_address() const {
   return socket::SocketAddress(local_ip, _port);
 }
 }

@@ -1,10 +1,8 @@
 #include <boost/assert.hpp>
+#include <p2psc/log.h>
 #include <p2psc/socket.h>
 
 namespace p2psc {
-namespace {
-const int RECV_BUF_SIZE = 1024;
-}
 
 Socket::Socket(const socket::SocketAddress &socket_address) : _is_open(false) {
   memset(&_address, 0, sizeof(_address));
@@ -44,10 +42,10 @@ void Socket::send(const std::string &message) {
 std::string Socket::receive() {
   _check_is_open();
   std::string received_data;
-  char receive_buffer[RECV_BUF_SIZE];
+  char receive_buffer[socket::RECV_BUF_SIZE];
   ssize_t received_bytes;
   do {
-    received_bytes = read(_sock_fd, receive_buffer, RECV_BUF_SIZE);
+    received_bytes = read(_sock_fd, receive_buffer, socket::RECV_BUF_SIZE);
     if (received_bytes == -1) {
       throw socket::SocketException(
           "receive failed (fd=" + std::to_string(_sock_fd) +
@@ -55,7 +53,7 @@ std::string Socket::receive() {
     }
     received_data +=
         std::string(receive_buffer, receive_buffer + received_bytes);
-  } while (received_bytes == RECV_BUF_SIZE);
+  } while (received_bytes == socket::RECV_BUF_SIZE);
 
   if (received_bytes == 0) {
     throw socket::SocketException("receive failed: Peer closed connection");
