@@ -104,6 +104,11 @@ BOOST_AUTO_TEST_CASE(ShouldSendAndReceive) {
   verifySendAndReceive("banana", "potato");
 }
 
+BOOST_AUTO_TEST_CASE(ShouldSendAndReceiveExactlyRecvBufferSize) {
+  verifySendAndReceive(std::string(socket::RECV_BUF_SIZE, 'a'),
+                       std::string(socket::RECV_BUF_SIZE, 'b'));
+}
+
 BOOST_AUTO_TEST_CASE(ShouldSendAndReceiveMoreThanRecvBufferSize) {
   verifySendAndReceive(std::string(socket::RECV_BUF_SIZE + 1, 'a'),
                        std::string(socket::RECV_BUF_SIZE + 1, 'b'));

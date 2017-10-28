@@ -1,6 +1,8 @@
 #include <boost/assert.hpp>
 #include <p2psc/log.h>
 #include <p2psc/socket.h>
+#include <sys/filio.h>
+#include <sys/ioctl.h>
 
 namespace p2psc {
 
@@ -45,14 +47,29 @@ std::string Socket::receive() {
   char receive_buffer[socket::RECV_BUF_SIZE];
   ssize_t received_bytes;
   do {
+    // The first time read is called, we block. This allows us to call
+    // receive() and have that block indefinitely rather than having to
+    // repeatedly call receive() at the application layer.
     received_bytes = read(_sock_fd, receive_buffer, socket::RECV_BUF_SIZE);
+
     if (received_bytes == -1) {
       throw socket::SocketException(
           "receive failed (fd=" + std::to_string(_sock_fd) +
           "): " + std::string(strerror(errno)));
     }
+
     received_data +=
         std::string(receive_buffer, receive_buffer + received_bytes);
+
+    // Now check if there's more in the buffer or if we've received exactly
+    // RECV_BUF_SIZE bytes in this message.
+    if (received_bytes == socket::RECV_BUF_SIZE) {
+      int count;
+      ioctl(_sock_fd, FIONREAD, &count);
+      if (count == 0) {
+        break;
+      }
+    }
   } while (received_bytes == socket::RECV_BUF_SIZE);
 
   if (received_bytes == 0) {
