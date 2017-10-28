@@ -12,6 +12,10 @@ struct AdvertiseRetry {
   static const MessageType type = kTypeAdvertiseRetry;
   std::string reason;
 };
+
+inline bool operator==(const AdvertiseRetry &lhs, const AdvertiseRetry &rhs) {
+  return lhs.reason == rhs.reason;
+}
 }
 }
 

@@ -14,6 +14,11 @@ struct PeerIdentification {
   std::string ip;
   std::uint16_t port;
 };
+
+inline bool operator==(const PeerIdentification &lhs,
+                       const PeerIdentification &rhs) {
+  return lhs.version == rhs.version && lhs.ip == rhs.ip && lhs.port == rhs.port;
+}
 }
 }
 

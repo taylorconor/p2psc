@@ -21,10 +21,11 @@ namespace integration {
 namespace util {
 
 FakeMediator::FakeMediator()
-    : _mediator(_socket.get_socket_address()), _protocol_version(kVersion) {}
+    : _mediator(_socket.get_socket_address()), _is_running(false),
+      _protocol_version(kVersion) {}
 
 FakeMediator::FakeMediator(const p2psc::Mediator &mediator)
-    : _mediator(mediator), _protocol_version(kVersion) {}
+    : _mediator(mediator), _is_running(false), _protocol_version(kVersion) {}
 
 FakeMediator::~FakeMediator() {
   if (_is_running) {

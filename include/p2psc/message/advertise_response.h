@@ -12,6 +12,11 @@ struct AdvertiseResponse {
   static const MessageType type = kTypeAdvertiseResponse;
   std::string nonce;
 };
+
+inline bool operator==(const AdvertiseResponse &lhs,
+                       const AdvertiseResponse &rhs) {
+  return lhs.nonce == rhs.nonce;
+}
 }
 }
 

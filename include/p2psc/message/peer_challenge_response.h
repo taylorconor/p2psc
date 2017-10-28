@@ -13,6 +13,12 @@ struct PeerChallengeResponse {
   std::string encrypted_nonce;
   std::string decrypted_nonce;
 };
+
+inline bool operator==(const PeerChallengeResponse &lhs,
+                       const PeerChallengeResponse &rhs) {
+  return lhs.encrypted_nonce == rhs.encrypted_nonce &&
+         lhs.decrypted_nonce == rhs.decrypted_nonce;
+}
 }
 }
 

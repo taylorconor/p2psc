@@ -12,6 +12,10 @@ struct PeerDisconnect {
   static const MessageType type = kTypePeerDisconnect;
   std::uint16_t port;
 };
+
+inline bool operator==(const PeerDisconnect &lhs, const PeerDisconnect &rhs) {
+  return lhs.port == rhs.port;
+}
 }
 }
 

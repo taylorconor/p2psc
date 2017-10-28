@@ -12,6 +12,10 @@ struct PeerChallenge {
   static const MessageType type = kTypePeerChallenge;
   std::string encrypted_nonce;
 };
+
+inline bool operator==(const PeerChallenge &lhs, const PeerChallenge &rhs) {
+  return lhs.encrypted_nonce == rhs.encrypted_nonce;
+}
 }
 }
 

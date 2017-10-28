@@ -14,6 +14,11 @@ struct Advertise {
   std::string our_key;
   std::string their_key;
 };
+
+inline bool operator==(const Advertise &lhs, const Advertise &rhs) {
+  return lhs.version == rhs.version && lhs.our_key == rhs.our_key &&
+         lhs.their_key == rhs.their_key;
+}
 }
 }
 

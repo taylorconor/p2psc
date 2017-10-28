@@ -12,6 +12,10 @@ struct AdvertiseAbort {
   static const MessageType type = kTypeAdvertiseAbort;
   std::string reason;
 };
+
+inline bool operator==(const AdvertiseAbort &lhs, const AdvertiseAbort &rhs) {
+  return lhs.reason == rhs.reason;
+}
 }
 }
 
