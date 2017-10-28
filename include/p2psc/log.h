@@ -26,7 +26,7 @@ std::string current_time() {
 
 enum level { Error, Warning, Info, Debug };
 
-#define REPORTING_LEVEL level::Info
+#define REPORTING_LEVEL level::Debug
 
 #define LOG(level)                                                             \
   if (level > REPORTING_LEVEL)                                                 \

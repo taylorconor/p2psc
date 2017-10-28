@@ -3,13 +3,18 @@
 #include <p2psc/mediator_connection.h>
 #include <p2psc/message.h>
 #include <p2psc/message/advertise.h>
+#include <p2psc/message/advertise_abort.h>
 #include <p2psc/message/advertise_challenge.h>
 #include <p2psc/message/advertise_response.h>
+#include <p2psc/message/advertise_retry.h>
 #include <p2psc/message/message_decoder.h>
 #include <p2psc/message/message_util.h>
 #include <p2psc/message/peer_identification.h>
 
 namespace p2psc {
+namespace {
+const int MAX_ADVERTISE_RETRIES = 5;
+}
 
 MediatorConnection::MediatorConnection(const Mediator &mediator)
     : _mediator(mediator), _connected(false), _socket(nullptr) {}
@@ -20,19 +25,51 @@ void MediatorConnection::connect(const key::Keypair &our_keypair,
   LOG(level::Info) << "Connecting to Mediator (on " << _mediator.socket_address
                    << ")";
   _socket = std::make_shared<Socket>(_mediator.socket_address);
-  // send advertise
-  const auto advertise = Message<message::Advertise>(message::Advertise{
-      our_keypair.get_serialised_public_key(), peer.public_key.serialise()});
-  message::send_and_log(_socket, advertise);
 
-  // receive advertise challenge
-  const auto advertise_challenge =
-      message::receive_and_log<message::AdvertiseChallenge>(_socket);
+  message::MessageType mediator_response_type;
+  message::AdvertiseChallenge advertise_challenge;
+  int advertise_retries = 0;
+  do {
+    // send advertise
+    const auto advertise = Message<message::Advertise>(message::Advertise{
+        our_keypair.get_serialised_public_key(), peer.public_key.serialise()});
+    message::send_and_log(_socket, advertise);
+
+    // receive some response from the mediator
+    const auto raw_mediator_response = _socket->receive();
+    mediator_response_type =
+        message::decode_message_type(raw_mediator_response);
+    if (mediator_response_type == message::kTypeAdvertiseAbort) {
+      const auto advertise_abort =
+          message::decode<message::AdvertiseAbort>(raw_mediator_response);
+      throw std::runtime_error("AdvertiseAbort: " +
+                               advertise_abort.payload.reason);
+    } else if (mediator_response_type == message::kTypeAdvertiseRetry) {
+      const auto advertise_retry =
+          message::decode<message::AdvertiseRetry>(raw_mediator_response);
+      if (advertise_retries == MAX_ADVERTISE_RETRIES) {
+        throw std::runtime_error(
+            "AdvertiseRetry: Retried " + std::to_string(advertise_retries) +
+            " times, aborting. Reason: " + advertise_retry.payload.reason);
+      }
+      LOG(level::Info) << "Advertise rejected by Mediator. Retrying. Reason: "
+                       << advertise_retry.payload.reason;
+      advertise_retries++;
+    } else if (mediator_response_type == message::kTypeAdvertiseChallenge) {
+      advertise_challenge =
+          message::decode<message::AdvertiseChallenge>(raw_mediator_response)
+              .payload;
+    } else {
+      throw std::runtime_error(
+          "Unexpected message type: " +
+          message::message_type_string(mediator_response_type));
+    }
+  } while (mediator_response_type == message::kTypeAdvertiseRetry);
 
   std::string decrypted_nonce;
   try {
-    decrypted_nonce = our_keypair.private_decrypt(
-        advertise_challenge.format().payload.encrypted_nonce);
+    decrypted_nonce =
+        our_keypair.private_decrypt(advertise_challenge.encrypted_nonce);
   } catch (crypto::CryptoException &e) {
     throw std::runtime_error(
         "AdvertiseChallenge: Could not decrypt encrypted_nonce");
@@ -43,8 +80,7 @@ void MediatorConnection::connect(const key::Keypair &our_keypair,
       message::AdvertiseResponse{decrypted_nonce});
   message::send_and_log(_socket, advertise_response);
 
-  // now we wait for either a PeerIdentification message from the Mediator,
-  // or for a PeerChallenge from the Peer.
+  // now we wait for either a PeerIdentification or PeerChallenge.
   const auto raw_message = _socket->receive();
   const auto message_type = message::decode_message_type(raw_message);
   if (message_type == message::kTypePeerIdentification) {
