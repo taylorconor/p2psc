@@ -22,6 +22,7 @@ public:
 private:
   int _sockfd;
   uint16_t _port;
+  bool _is_open;
 };
 }
 }

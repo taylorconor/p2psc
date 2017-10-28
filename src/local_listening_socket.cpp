@@ -44,16 +44,19 @@ uint16_t port_from_socket(int sockfd) {
 LocalListeningSocket::LocalListeningSocket()
     : _sockfd(create_socket_fd(INADDR_ANY)), _port(port_from_socket(_sockfd)) {
   listen(_sockfd, 5);
+  _is_open = true;
 }
 
 LocalListeningSocket::LocalListeningSocket(uint16_t port)
     : _sockfd(create_socket_fd(port)), _port(port) {
   listen(_sockfd, 5);
+  _is_open = true;
 }
 
 LocalListeningSocket::~LocalListeningSocket() { close(); }
 
 std::shared_ptr<Socket> LocalListeningSocket::accept() const {
+  BOOST_ASSERT(_is_open);
   int session_fd = ::accept(_sockfd, NULL, NULL);
   if (session_fd < 0) {
     return nullptr;
@@ -61,7 +64,11 @@ std::shared_ptr<Socket> LocalListeningSocket::accept() const {
   return std::make_shared<Socket>(session_fd);
 }
 
-void LocalListeningSocket::close() { ::close(_sockfd); }
+void LocalListeningSocket::close() {
+  BOOST_ASSERT(_is_open);
+  ::close(_sockfd);
+  _is_open = false;
+}
 
 socket::SocketAddress LocalListeningSocket::get_socket_address() const {
   return socket::SocketAddress(local_ip, _port);

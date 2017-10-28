@@ -8,6 +8,7 @@ add_executable(p2psc_test
         test.cpp
 
         p2psc/connection_test.cpp
+        p2psc/local_listening_socket_test.cpp
         p2psc/message_test.cpp
         p2psc/rsa_test.cpp
         p2psc/socket_test.cpp)

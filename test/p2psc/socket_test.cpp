@@ -45,6 +45,11 @@ void verifySendAndReceive(const std::string &message_1,
 
 BOOST_AUTO_TEST_SUITE(socket_test);
 
+/*
+ * Some of the tests in this suite are duplicated in the
+ * local_listening_socket_test suite.
+ */
+
 BOOST_AUTO_TEST_CASE(ShouldReturnCorrectSocketAddress) {
   std::mutex mutex;
   std::condition_variable cv;
