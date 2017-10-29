@@ -21,11 +21,13 @@ namespace integration {
 namespace util {
 
 FakeMediator::FakeMediator()
-    : _mediator(_socket.get_socket_address()), _is_running(false),
+    : _socket(std::make_unique<socket::LocalListeningSocket>()),
+      _mediator(_socket->get_socket_address()), _is_running(false),
       _protocol_version(kVersion) {}
 
 FakeMediator::FakeMediator(const p2psc::Mediator &mediator)
-    : _mediator(mediator), _is_running(false), _protocol_version(kVersion) {}
+    : _socket(std::make_unique<socket::LocalListeningSocket>()),
+      _mediator(mediator), _is_running(false), _protocol_version(kVersion) {}
 
 FakeMediator::~FakeMediator() {
   if (_is_running) {
@@ -42,7 +44,7 @@ void FakeMediator::run() {
 void FakeMediator::stop() {
   BOOST_ASSERT(_is_running);
   _is_running = false;
-  _socket.close();
+  _socket->close();
   _worker_thread.join();
   for (auto &handler_thread : _handler_pool) {
     handler_thread.join();
@@ -55,7 +57,7 @@ void FakeMediator::quit_after(message::MessageType message_type) {
 
 void FakeMediator::_run() {
   while (_is_running) {
-    auto socket = _socket.accept();
+    auto socket = _socket->accept();
     if (!socket) {
       continue;
     }

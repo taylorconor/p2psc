@@ -28,7 +28,7 @@ public:
   std::vector<std::string> get_sent_messages() const;
 
 private:
-  socket::LocalListeningSocket _socket;
+  std::unique_ptr<socket::LocalListeningSocket> _socket;
   p2psc::Mediator _mediator;
   KeyToIdentifierStore _key_to_identifier_store;
   bool _is_running;

@@ -65,9 +65,10 @@ std::shared_ptr<Socket> LocalListeningSocket::accept() const {
 }
 
 void LocalListeningSocket::close() {
-  BOOST_ASSERT(_is_open);
-  ::close(_sockfd);
-  _is_open = false;
+  if (_is_open) {
+    ::close(_sockfd);
+    _is_open = false;
+  }
 }
 
 socket::SocketAddress LocalListeningSocket::get_socket_address() const {

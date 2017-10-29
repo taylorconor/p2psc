@@ -1,6 +1,6 @@
 #include <boost/test/unit_test.hpp>
-#include <p2psc/socket/local_listening_socket.h>
 #include <p2psc/log.h>
+#include <p2psc/socket/local_listening_socket.h>
 
 namespace p2psc {
 namespace test {
@@ -13,8 +13,8 @@ BOOST_AUTO_TEST_SUITE(local_listening_socket_test);
 
 BOOST_AUTO_TEST_CASE(ShouldRepeatedlyBindToFreePort) {
   for (int i = 0; i < 1000; i++) {
-    const auto socket = socket::LocalListeningSocket();
-    BOOST_ASSERT(socket.get_socket_address().port() > 1024);
+    const auto socket = std::make_unique<socket::LocalListeningSocket>();
+    BOOST_ASSERT(socket->get_socket_address().port() > 1024);
   }
 }
 
@@ -23,8 +23,8 @@ BOOST_AUTO_TEST_CASE(ShouldBindToSpecifiedPort) {
    * NOTE: this test is potentially flaky depending on the environment in
    * which it is run.
    */
-  const auto socket = socket::LocalListeningSocket(1337);
-  BOOST_ASSERT(socket.get_socket_address().port() == 1337);
+  const auto socket = std::make_unique<socket::LocalListeningSocket>(1337);
+  BOOST_ASSERT(socket->get_socket_address().port() == 1337);
 }
 
 BOOST_AUTO_TEST_CASE(ShouldAcceptAndCreateSocket) {
@@ -33,10 +33,10 @@ BOOST_AUTO_TEST_CASE(ShouldAcceptAndCreateSocket) {
   uint16_t port;
   bool has_received_message = false;
   std::thread thread([&]() mutable {
-    const auto listener = socket::LocalListeningSocket();
-    port = listener.get_socket_address().port();
+    const auto listener = std::make_unique<socket::LocalListeningSocket>();
+    port = listener->get_socket_address().port();
     cv.notify_one();
-    const auto socket = listener.accept();
+    const auto socket = listener->accept();
     BOOST_ASSERT(socket != nullptr);
     const auto message = socket->receive();
     BOOST_ASSERT(message == "bananas");
@@ -57,6 +57,5 @@ BOOST_AUTO_TEST_CASE(ShouldAcceptAndCreateSocket) {
 }
 
 BOOST_AUTO_TEST_SUITE_END();
-
 }
 }

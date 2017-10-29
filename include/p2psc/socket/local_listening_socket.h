@@ -20,6 +20,8 @@ public:
   socket::SocketAddress get_socket_address() const;
 
 private:
+  LocalListeningSocket(const LocalListeningSocket &) = delete;
+
   int _sockfd;
   uint16_t _port;
   bool _is_open;

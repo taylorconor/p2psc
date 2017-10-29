@@ -14,10 +14,10 @@ void verifySendAndReceive(const std::string &message_1,
   uint16_t port;
   bool has_completed = false;
   std::thread thread([&]() mutable {
-    const auto listener = socket::LocalListeningSocket();
-    port = listener.get_socket_address().port();
+    const auto listener = std::make_unique<socket::LocalListeningSocket>();
+    port = listener->get_socket_address().port();
     cv.notify_one();
-    const auto socket = listener.accept();
+    const auto socket = listener->accept();
     BOOST_ASSERT(socket != nullptr);
     const auto message = socket->receive();
     BOOST_ASSERT(message == message_1);
@@ -55,10 +55,10 @@ BOOST_AUTO_TEST_CASE(ShouldReturnCorrectSocketAddress) {
   std::condition_variable cv;
   uint16_t port;
   std::thread thread([&cv, &port]() mutable {
-    const auto listener = socket::LocalListeningSocket();
-    port = listener.get_socket_address().port();
+    const auto listener = std::make_unique<socket::LocalListeningSocket>();
+    port = listener->get_socket_address().port();
     cv.notify_one();
-    const auto socket = listener.accept();
+    const auto socket = listener->accept();
   });
 
   std::unique_lock<std::mutex> lock(mutex);
@@ -87,10 +87,10 @@ BOOST_AUTO_TEST_CASE(ShouldConnectToListeningPort) {
   std::condition_variable cv;
   uint16_t port;
   std::thread thread([&cv, &port]() mutable {
-    const auto listener = socket::LocalListeningSocket();
-    port = listener.get_socket_address().port();
+    const auto listener = std::make_unique<socket::LocalListeningSocket>();
+    port = listener->get_socket_address().port();
     cv.notify_one();
-    const auto socket = listener.accept();
+    const auto socket = listener->accept();
     BOOST_ASSERT(socket != nullptr);
   });
 

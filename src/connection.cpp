@@ -101,9 +101,9 @@ _connect_as_peer(MediatorConnection &mediator_connection,
   LOG(level::Debug) << "Closing mediator socket to begin listening on "
                     << socket_address;
   mediator_connection.close_socket();
-  const auto listening_socket = socket::LocalListeningSocket(
+  const auto listening_socket = std::make_unique<socket::LocalListeningSocket>(
       mediator_connection.get_peer_disconnect().port);
-  const auto socket = listening_socket.accept();
+  const auto socket = listening_socket->accept();
 
   // receive peer challenge
   const auto peer_challenge =
