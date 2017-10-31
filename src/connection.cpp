@@ -178,7 +178,7 @@ std::shared_ptr<Socket> Connection::_connect(const key::Keypair &our_keypair,
   } else if (mediator_connection.has_peer_disconnect()) {
     return _connect_as_peer(mediator_connection, our_keypair, peer);
   } else {
-    throw std::runtime_error("No PunchedPeer or PeerChallenge");
+    throw std::runtime_error("No PunchedPeer or PeerDisconnect");
   }
 }
 }

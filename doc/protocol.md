@@ -12,8 +12,7 @@ are used so peers can prove their identities to each other, and can encrypt
 their communication.
 
 We also assume the presence of a Mediator, a server trusted by both Peers, to
-mediate the handshake. A Mediator specification is outlined in
-_**TODO: Mediator spec**_.
+mediate the handshake. A Mediator specification is outlined [here](mediator.md).
 
 ## Handshake
 A socket creation handshake happens in two stages; first, the Client registers
