@@ -1,11 +1,11 @@
 #include <boost/test/unit_test.hpp>
-#include <include/util/client.h>
-#include <include/util/fake_mediator.h>
 #include <p2psc/message/advertise.h>
 #include <p2psc/message/advertise_challenge.h>
 #include <p2psc/message/advertise_response.h>
 #include <p2psc/message/message_decoder.h>
 #include <p2psc/message/peer_identification.h>
+#include <src/util/client.h>
+#include <src/util/fake_mediator.h>
 
 namespace p2psc {
 namespace integration {

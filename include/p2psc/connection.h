@@ -5,7 +5,6 @@
 #include <p2psc/key/keypair.h>
 #include <p2psc/mediator.h>
 #include <p2psc/peer.h>
-#include <p2psc/punched_peer.h>
 #include <p2psc/socket.h>
 
 namespace p2psc {

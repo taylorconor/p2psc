@@ -1,5 +1,4 @@
-#include <include/util/fake_mediator.h>
-#include <p2psc/crypto/rsa.h>
+#include <crypto/rsa.h>
 #include <p2psc/log.h>
 #include <p2psc/message/advertise.h>
 #include <p2psc/message/advertise_abort.h>
@@ -8,6 +7,7 @@
 #include <p2psc/message/message_decoder.h>
 #include <p2psc/message/peer_disconnect.h>
 #include <p2psc/message/peer_identification.h>
+#include <src/util/fake_mediator.h>
 
 #define QUIT_IF_REQUESTED(message_type, quit_indicator)                        \
   if (message_type == quit_indicator) {                                        \

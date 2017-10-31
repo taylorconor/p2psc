@@ -1,7 +1,7 @@
 #pragma once
 
-#include "peer_identifier.h"
 #include <boost/optional.hpp>
+#include <include/util/peer_identifier.h>
 #include <map>
 #include <mutex>
 #include <p2psc/socket/socket_address.h>

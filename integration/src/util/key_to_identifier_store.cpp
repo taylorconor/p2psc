@@ -1,4 +1,4 @@
-#include <include/util/key_to_identifier_store.h>
+#include <src/util/key_to_identifier_store.h>
 
 namespace p2psc {
 namespace integration {

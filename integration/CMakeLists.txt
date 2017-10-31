@@ -5,9 +5,9 @@ set(CMAKE_CXX_FLAGS
         "${CMAKE_CXX_FLAGS} -Wall -Werror -Wno-missing-braces -Wno-unused-function -std=c++14")
 
 add_executable(p2psc_integration_test
-        include/util/client.h
-        include/util/fake_mediator.h
-        include/util/key_to_identifier_store.h
+        src/util/client.h
+        src/util/fake_mediator.h
+        src/util/key_to_identifier_store.h
 
         test.cpp
         src/client_it.cpp

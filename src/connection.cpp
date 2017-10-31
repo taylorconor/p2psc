@@ -1,14 +1,13 @@
-#include <iostream>
+#include <mediator_connection.h>
 #include <p2psc/connection.h>
 #include <p2psc/crypto/crypto_exception.h>
 #include <p2psc/log.h>
-#include <p2psc/mediator_connection.h>
-#include <p2psc/message.h>
+#include <p2psc/message/message.h>
 #include <p2psc/message/message_util.h>
 #include <p2psc/message/peer_acknowledgement.h>
 #include <p2psc/message/peer_challenge_response.h>
 #include <p2psc/message/peer_response.h>
-#include <p2psc/socket/local_listening_socket.h>
+#include <socket/local_listening_socket.h>
 
 namespace p2psc {
 namespace {

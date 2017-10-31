@@ -8,13 +8,11 @@ add_library(p2psc
         include/p2psc/connection.h
         include/p2psc/crypto/crypto_exception.h
         include/p2psc/crypto/pki.h
-        include/p2psc/crypto/rsa.h
         include/p2psc/key/keypair.h
         include/p2psc/key/public_key.h
         include/p2psc/log.h
         include/p2psc/mediator.h
-        include/p2psc/mediator_connection.h
-        include/p2psc/message.h
+        include/p2psc/message/message.h
         include/p2psc/message/advertise.h
         include/p2psc/message/advertise_abort.h
         include/p2psc/message/advertise_challenge.h
@@ -35,20 +33,23 @@ add_library(p2psc
         include/p2psc/peer.h
         include/p2psc/punched_peer.h
         include/p2psc/socket.h
-        include/p2psc/socket/local_listening_socket.h
         include/p2psc/socket/socket_address.h
         include/p2psc/socket/socket_exception.h
         include/p2psc/version.h
 
         src/connection.cpp
-        src/keypair.cpp
-        src/local_listening_socket.cpp
+        src/crypto/rsa.cpp
+        src/key/keypair.cpp
+        src/key/public_key.cpp
         src/mediator_connection.cpp
-        src/public_key.cpp
-        src/rsa.cpp
-        src/socket.cpp)
+        src/socket/local_listening_socket.cpp
+        src/socket/socket.cpp)
 
-target_include_directories(p2psc PUBLIC include)
+target_include_directories(p2psc
+        PUBLIC
+        include
+        PRIVATE
+        src)
 
 add_subdirectory(test)
 add_subdirectory(integration)

@@ -1,18 +1,18 @@
 #include <boost/test/unit_test.hpp>
 #include <iostream>
-#include <p2psc/message.h>
 #include <p2psc/message/advertise.h>
 #include <p2psc/message/advertise_abort.h>
 #include <p2psc/message/advertise_challenge.h>
 #include <p2psc/message/advertise_response.h>
 #include <p2psc/message/advertise_retry.h>
+#include <p2psc/message/message.h>
 #include <p2psc/message/message_decoder.h>
+#include <p2psc/message/peer_acknowledgement.h>
 #include <p2psc/message/peer_challenge.h>
 #include <p2psc/message/peer_challenge_response.h>
 #include <p2psc/message/peer_disconnect.h>
 #include <p2psc/message/peer_identification.h>
 #include <p2psc/message/peer_response.h>
-#include <p2psc/message/peer_acknowledgement.h>
 
 namespace p2psc {
 namespace test {

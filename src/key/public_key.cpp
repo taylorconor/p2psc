@@ -1,3 +1,4 @@
+#include <crypto/rsa.h>
 #include <p2psc/key/public_key.h>
 
 namespace p2psc {

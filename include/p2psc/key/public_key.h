@@ -1,7 +1,5 @@
 #pragma once
 
-#include <p2psc/crypto/rsa.h>
-
 namespace p2psc {
 namespace key {
 

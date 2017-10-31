@@ -1,5 +1,5 @@
-#include <include/util/client.h>
 #include <p2psc/connection.h>
+#include <src/util/client.h>
 
 namespace p2psc {
 namespace integration {

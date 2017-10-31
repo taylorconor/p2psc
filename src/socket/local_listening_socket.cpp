@@ -1,6 +1,7 @@
+#include "local_listening_socket.h"
+
 #include <arpa/inet.h>
 #include <p2psc/log.h>
-#include <p2psc/socket/local_listening_socket.h>
 
 namespace p2psc {
 namespace socket {

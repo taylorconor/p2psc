@@ -1,10 +1,10 @@
 #pragma once
 
-#include <include/util/key_to_identifier_store.h>
 #include <p2psc/mediator.h>
-#include <p2psc/message.h>
+#include <p2psc/message/message.h>
 #include <p2psc/message/types.h>
-#include <p2psc/socket/local_listening_socket.h>
+#include <socket/local_listening_socket.h>
+#include <src/util/key_to_identifier_store.h>
 #include <thread>
 #include <vector>
 

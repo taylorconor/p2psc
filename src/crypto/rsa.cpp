@@ -1,8 +1,8 @@
 #include <base64/base64.h>
 #include <boost/optional.hpp>
+#include <crypto/rsa.h>
 #include <openssl/err.h>
 #include <p2psc/crypto/crypto_exception.h>
-#include <p2psc/crypto/rsa.h>
 
 namespace p2psc {
 namespace crypto {
@@ -65,8 +65,7 @@ int password_callback(char *buf, int size, int rwflag, void *userdata) {
   // prompting for a PEM password over stdin if the user fails to supply a
   // password for a protected PEM file.
   ::RSA *key = PEM_read_bio_RSAPrivateKey(
-      bio, 0, password_callback,
-      (void *)(password ? password->c_str() : ""));
+      bio, 0, password_callback, (void *)(password ? password->c_str() : ""));
   if (!key) {
     throw CryptoException("Could not restore key from file: " + path + ". " +
                           get_openssl_error_str());

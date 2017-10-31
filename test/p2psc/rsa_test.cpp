@@ -1,7 +1,7 @@
 #include <boost/test/unit_test.hpp>
+#include <crypto/rsa.h>
 #include <iostream>
 #include <p2psc/crypto/crypto_exception.h>
-#include <p2psc/crypto/rsa.h>
 
 namespace p2psc {
 namespace test {

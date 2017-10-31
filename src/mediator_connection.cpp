@@ -1,12 +1,13 @@
+#include "mediator_connection.h"
+
 #include <p2psc/crypto/crypto_exception.h>
 #include <p2psc/log.h>
-#include <p2psc/mediator_connection.h>
-#include <p2psc/message.h>
 #include <p2psc/message/advertise.h>
 #include <p2psc/message/advertise_abort.h>
 #include <p2psc/message/advertise_challenge.h>
 #include <p2psc/message/advertise_response.h>
 #include <p2psc/message/advertise_retry.h>
+#include <p2psc/message/message.h>
 #include <p2psc/message/message_decoder.h>
 #include <p2psc/message/message_util.h>
 #include <p2psc/message/peer_identification.h>
