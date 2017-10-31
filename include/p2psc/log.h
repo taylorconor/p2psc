@@ -23,7 +23,7 @@ std::string current_time() {
 }
 }
 
-enum level { Error, Warning, Info, Debug };
+enum class level { Error, Warning, Info, Debug };
 
 #define REPORTING_LEVEL level::Debug
 
@@ -45,8 +45,8 @@ public:
     std::cout << stream_string << std::endl;
   }
   std::ostringstream &get() {
-    _stream << current_time() << " " << level_strings[_level] << " "
-            << "(" << std::this_thread::get_id() << ")\t"
+    _stream << current_time() << " " << level_strings[static_cast<int>(_level)]
+            << " (" << std::this_thread::get_id() << ")\t"
             << _file.filename().string() << ":" << _line << ":\t";
     return _stream;
   }
@@ -59,7 +59,7 @@ private:
     return m;
   }
 
-  enum level _level;
+  level _level;
   boost::filesystem::path _file;
   long _line;
   std::ostringstream _stream;

@@ -2,6 +2,7 @@
 
 #include <functional>
 
+#include <p2psc/error.h>
 #include <p2psc/key/keypair.h>
 #include <p2psc/mediator.h>
 #include <p2psc/peer.h>
@@ -19,7 +20,7 @@ public:
    * Custom callback function to be called when the connection has been setup,
    * or when an error occurs.
    */
-  using Callback = std::function<void(std::shared_ptr<Socket>)>;
+  using Callback = std::function<void(Error, std::shared_ptr<Socket>)>;
 
   /*
    * Creates a socket with a known Peer.

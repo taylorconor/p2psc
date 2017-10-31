@@ -151,11 +151,12 @@ void Connection::_handle_connection(const key::Keypair &our_keypair,
     std::shared_ptr<Socket> socket = _connect(our_keypair, peer, mediator);
     LOG(level::Info) << "Successfully created socket (on "
                      << socket->get_socket_address() << ")";
-    callback(socket);
+    callback(Error(), socket);
   } catch (const socket::SocketException &e) {
     LOG(level::Error) << "Failed to connect to peer: " << e.what();
     // TODO: make an exception class specifically designed for returning an
     // error in the callback
+    callback(Error(error::kErrorUnknown, e.what()), nullptr);
   }
 }
 
