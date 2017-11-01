@@ -7,7 +7,7 @@ namespace p2psc {
 struct Mediator {
   const socket::SocketAddress socket_address;
 
-  Mediator(const socket::SocketAddress &socket_address)
-      : socket_address(socket_address) {}
+  Mediator(const std::string &ip, std::uint16_t port)
+      : socket_address(ip, port) {}
 };
 }

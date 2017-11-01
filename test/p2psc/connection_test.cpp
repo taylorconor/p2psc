@@ -15,7 +15,7 @@ BOOST_AUTO_TEST_CASE(ShouldCallbackWithErrorForNonExistantMediator) {
   const auto keypair = key::Keypair::generate();
   const auto peer_pub_key = key::PublicKey::generate();
   const auto peer = Peer(peer_pub_key);
-  const auto mediator = Mediator(socket::SocketAddress("127.0.0.1", 1337));
+  const auto mediator = Mediator("127.0.0.1", 1337);
   const auto callback = [&](Error error, std::shared_ptr<Socket> socket) {
     BOOST_ASSERT(error);
     BOOST_ASSERT(socket == nullptr);

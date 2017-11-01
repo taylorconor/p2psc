@@ -43,16 +43,19 @@ int main() {
     auto my_keypair = p2psc::key::Keypair::from_pem("my_keypair.pem");
     auto their_key = p2psc::key::PublicKey::from_pem("their_public_key.pem");
     auto peer = p2psc::Peer(their_key);
-    auto mediator = p2psc::Mediator(p2psc::socket::SocketAddress("127.0.0.1", 1337));
-    auto callback = [&](p2psc::Error error, std::shared_ptr<p2psc::Socket> socket) {
-      if (!error) {
-        socket->send("Hallå!");
-      }
-    };
+    auto mediator = p2psc::Mediator("127.0.0.1", 1337);
 
-    p2psc::Connection::connect(keypair, peer, mediator, callback);
+    p2psc::Connection::connect(keypair, peer, mediator,
+        [](p2psc::Error error, std::shared_ptr<p2psc::Socket> socket) {
+          if (!error) {
+            socket->send("Hallå!");
+          }
+        });
 }
 ```
+
+If everything goes well, we'll be able to send a message directly to the other
+peer with the socket that has been created for us by p2psc!
 
 ## Mediator specification
 p2psc provides a client-side library used to create a p2p socket. It does not
