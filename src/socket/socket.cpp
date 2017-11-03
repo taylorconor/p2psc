@@ -1,6 +1,8 @@
+#include <arpa/inet.h>
 #include <boost/assert.hpp>
 #include <p2psc/log.h>
-#include <p2psc/socket.h>
+#include <p2psc/socket/socket.h>
+#include <sstream>
 #include <sys/filio.h>
 #include <sys/ioctl.h>
 

@@ -7,7 +7,7 @@
 #include <p2psc/message/peer_challenge.h>
 #include <p2psc/message/peer_disconnect.h>
 #include <p2psc/punched_peer.h>
-#include <p2psc/socket.h>
+#include <p2psc/socket/socket.h>
 
 namespace p2psc {
 

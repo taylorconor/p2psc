@@ -18,6 +18,8 @@ public:
   virtual void write_to_file(const std::string &path,
                              const std::string &password,
                              const std::string &cipher) const = 0;
+
+  virtual ~PKI() {}
 };
 }
 }

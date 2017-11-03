@@ -1,13 +1,10 @@
 #pragma once
 
-#include <arpa/inet.h>
 #include <iostream>
 #include <netinet/in.h>
 #include <p2psc/socket/socket_address.h>
 #include <p2psc/socket/socket_exception.h>
-#include <sstream>
 #include <sys/socket.h>
-#include <unistd.h>
 
 namespace p2psc {
 namespace socket {

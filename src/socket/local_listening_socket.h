@@ -1,7 +1,7 @@
 #pragma once
 
 #include <boost/optional.hpp>
-#include <p2psc/socket.h>
+#include <p2psc/socket/socket.h>
 #include <p2psc/socket/socket_address.h>
 #include <string>
 
