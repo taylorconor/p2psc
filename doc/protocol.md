@@ -25,8 +25,8 @@ A Peer advertises itself to the Mediator by sending an `Advertise` message:
 ```
 {
     'type': kMessageTypeAdvertise,
-    'version': [p2psc version],
     'payload': {
+        'version': [p2psc protocol version],
         'our_key': [Public Key],
         'their_key': [Public Key]
      }
@@ -39,7 +39,6 @@ verify the identity of the Peer by sending an `AdvertiseChallenge` message:
 ```
 {
     'type': kMessageTypeAdvertiseChallenge,
-    'version': [p2psc version],
     'payload': {
         'encrypted_nonce': [Nonce encrypted with our_key]
     }
@@ -53,7 +52,6 @@ the abort:
 ```
 {
     'type': kMessageTypeAdvertiseAbort,
-    'version': [p2psc version],
     'payload': {
         'reason': [String, reason for aborting the Mediator handshake]
     }
@@ -67,7 +65,6 @@ is returned to the Peer, with a reason for the retry request:
 ```
 {
     'type': kMessageTypeAdvertiseRetry,
-    'version': [p2psc version],
     'payload': {
         'reason': [String, reason for requesting a retry]
     }
@@ -80,7 +77,6 @@ the Peer's private key:
 ```
 {
     'type': kMessageTypeAdvertiseResponse,
-    'version': [p2psc version],
     'payload': {
         'nonce': [Decrypted encrypted_nonce from AdvertiseChallenge]
     }
@@ -104,7 +100,6 @@ sends a `PeerDisconnect` message to the Peer:
 ```
 {
     'type': kMessageTypePeerDisconnect,
-    'version': [p2psc version],
     'payload': {
         'port': [uint16_t port number]
     }
@@ -125,7 +120,6 @@ the Client:
 ```
 {
     'type': kMessageTypePeerIdentification,
-    'version': [p2psc version],
     'payload': {
         'ip': [String IP address],
         'port': [uint16_t port number]
@@ -141,7 +135,6 @@ message to the Peer:
 ```
 {
     'type': kMessageTypePeerChallenge,
-    'version': [p2psc version],
     'payload': {
         'encrypted_nonce': [Nonce encrypted with Client's public key]
     }
@@ -154,7 +147,6 @@ and attempts to verify the identity of the Client by replying with a
 ```
 {
     'type': kMessageTypePeerChallengeResponse,
-    'version': [p2psc version],
     'payload': {
         'encrypted_nonce': [Nonce encrypted with Peer's public key],
         'decrypted_nonce': [Decrypted encrypted_nonce from PeerChallenge]
@@ -167,7 +159,6 @@ Provided that the `decrypted_nonce` is correct, the Client will reply with a
 ```
 {
     'type': kMessageTypePeerResponse,
-    'version': [p2psc version],
     'payload': {
         'decrypted_nonce': [Decrypted encrypted_nonce from PeerChallengeResponse]
     }
@@ -179,9 +170,7 @@ socket. Otherwise, it will reply with a `PeerAcknowledgement` message:
 ```
 {
     'type': kMessageTypePeerAcknowledgement,
-    'version': [p2psc version],
-    'payload': {
-    }
+    'payload': {}
 }
 ```
 
