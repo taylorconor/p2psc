@@ -1,5 +1,6 @@
 #include <mediator_connection.h>
 #include <p2psc/connection.h>
+#include <p2psc/connection_exception.h>
 #include <p2psc/crypto/crypto_exception.h>
 #include <p2psc/log.h>
 #include <p2psc/message/message.h>
@@ -152,11 +153,19 @@ void Connection::_handle_connection(const key::Keypair &our_keypair,
     LOG(level::Info) << "Successfully created socket (on "
                      << socket->get_socket_address() << ")";
     callback(Error(), socket);
-  } catch (const socket::SocketException &e) {
+  } catch (const ConnectionException &e) {
     LOG(level::Error) << "Failed to connect to peer: " << e.what();
-    // TODO: make an exception class specifically designed for returning an
-    // error in the callback
+    callback(e.error(), nullptr);
+  } catch (const std::runtime_error &e) {
+    LOG(level::Error) << "Unhandled exception. Failed to connect to peer: "
+                      << e.what();
     callback(Error(error::kErrorUnknown, e.what()), nullptr);
+  } catch (const std::exception &e) {
+    LOG(level::Error) << "Unhandled exception. Failed to connect to peer: "
+                      << e.what();
+    callback(Error(error::kErrorUnknown, e.what()), nullptr);
+  } catch (...) {
+    LOG(level::Error) << "Unknown failure. This is a serious bug." << std::endl;
   }
 }
 
@@ -172,7 +181,12 @@ std::shared_ptr<Socket> Connection::_connect(const key::Keypair &our_keypair,
   // verify our identities. Otherwise, we first must create a socket with the
   // Peer before verification can happen.
   auto mediator_connection = MediatorConnection(mediator);
-  mediator_connection.connect(our_keypair, peer);
+  try {
+    mediator_connection.connect(our_keypair, peer);
+  } catch (const socket::SocketException &e) {
+    throw ConnectionException(
+        Error(error::kErrorMediatorConnectFailure, e.what()));
+  }
   if (mediator_connection.has_punched_peer()) {
     return _connect_as_client(mediator_connection, our_keypair);
   } else if (mediator_connection.has_peer_disconnect()) {

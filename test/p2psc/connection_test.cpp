@@ -18,6 +18,7 @@ BOOST_AUTO_TEST_CASE(ShouldCallbackWithErrorForNonExistantMediator) {
   const auto mediator = Mediator("127.0.0.1", 1337);
   const auto callback = [&](Error error, std::shared_ptr<Socket> socket) {
     BOOST_ASSERT(error);
+    BOOST_ASSERT(error.kind() == error::kErrorMediatorConnectFailure);
     BOOST_ASSERT(socket == nullptr);
     has_called_callback = true;
     cv.notify_one();
