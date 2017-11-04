@@ -33,9 +33,10 @@ _connect_as_client(MediatorConnection &mediator_connection,
   if (punched_peer.version != kVersion) {
     LOG(level::Error) << "Peer has incompatible protocol version "
                       << punched_peer.version << ". Require " << kVersion;
-    throw std::runtime_error("Incompatible protocol version (" +
-                             std::to_string(punched_peer.version) +
-                             " != " + std::to_string(kVersion) + ")");
+    throw ConnectionException(error::kErrorPeerUnsupportedProtocolVersion,
+                              "Peer has incompatible protocol version " +
+                                  std::to_string(punched_peer.version) +
+                                  ". Require " + std::to_string(kVersion));
   }
 
   std::shared_ptr<Socket> socket;
@@ -184,8 +185,7 @@ std::shared_ptr<Socket> Connection::_connect(const key::Keypair &our_keypair,
   try {
     mediator_connection.connect(our_keypair, peer);
   } catch (const socket::SocketException &e) {
-    throw ConnectionException(
-        Error(error::kErrorMediatorConnectFailure, e.what()));
+    throw ConnectionException(error::kErrorMediatorConnectFailure, e.what());
   }
   if (mediator_connection.has_punched_peer()) {
     return _connect_as_client(mediator_connection, our_keypair);

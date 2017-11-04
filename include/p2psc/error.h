@@ -4,7 +4,11 @@
 
 namespace p2psc {
 namespace error {
-enum Kind { kErrorMediatorConnectFailure, kErrorUnknown };
+enum Kind {
+  kErrorUnknown,
+  kErrorPeerUnsupportedProtocolVersion,
+  kErrorMediatorConnectFailure
+};
 }
 class Error {
 public:

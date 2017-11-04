@@ -7,7 +7,8 @@ namespace p2psc {
 
 class ConnectionException : public std::exception {
 public:
-  ConnectionException(const Error &error) : _error(error) {}
+  ConnectionException(const error::Kind kind, const std::string &reason)
+      : _error(kind, reason) {}
 
   virtual Error error() const noexcept { return _error; }
   virtual const char *what() const noexcept override {
