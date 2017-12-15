@@ -7,33 +7,30 @@
 #include <p2psc/mediator.h>
 #include <p2psc/peer.h>
 #include <p2psc/socket/socket.h>
+#include <p2psc/socket_creator.h>
 
 namespace p2psc {
 
-/**
- * The Connection class defines the (very simple) API for p2psc. A single static
- * method is used to create sockets.
+/*
+ * Custom callback function to be called when the connection has been setup,
+ * or when an error occurs.
  */
+// TODO(taylorconor): Socket should be the interface here.
+using Callback = std::function<void(Error, std::shared_ptr<Socket>)>;
+
 class Connection {
 public:
-  /*
-   * Custom callback function to be called when the connection has been setup,
-   * or when an error occurs.
-   */
-  using Callback = std::function<void(Error, std::shared_ptr<Socket>)>;
-
-  /*
-   * Creates a socket with a known Peer.
-   */
   static void connect(const key::Keypair &, const Peer &, const Mediator &,
-                      const Callback &);
+                      const Callback &, const SocketCreator &);
 
 private:
   static void _execute_asynchronously(std::function<void()>);
 
   static void _handle_connection(const key::Keypair &, const Peer &,
-                                 const Mediator &, const Callback &);
+                                 const Mediator &, const Callback &,
+                                 const SocketCreator &);
   static std::shared_ptr<Socket> _connect(const key::Keypair &, const Peer &,
-                                          const Mediator &);
+                                          const Mediator &,
+                                          const SocketCreator &);
 };
 }

@@ -17,15 +17,17 @@ namespace {
 const int MAX_ADVERTISE_RETRIES = 5;
 }
 
-MediatorConnection::MediatorConnection(const Mediator &mediator)
-    : _mediator(mediator), _connected(false), _socket(nullptr) {}
+MediatorConnection::MediatorConnection(const Mediator &mediator,
+                                       const SocketCreator &socket_creator)
+    : _mediator(mediator), _connected(false), _socket_creator(socket_creator),
+      _socket(nullptr) {}
 
 void MediatorConnection::connect(const key::Keypair &our_keypair,
                                  const Peer &peer) {
   BOOST_ASSERT(!_connected);
   LOG(level::Info) << "Connecting to Mediator (on " << _mediator.socket_address
                    << ")";
-  _socket = std::make_shared<Socket>(_mediator.socket_address);
+  _socket = _socket_creator(_mediator.socket_address);
 
   message::MessageType mediator_response_type;
   message::AdvertiseChallenge advertise_challenge;

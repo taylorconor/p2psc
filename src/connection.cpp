@@ -22,7 +22,8 @@ std::string generate_nonce() {
 
 std::shared_ptr<Socket>
 _connect_as_client(MediatorConnection &mediator_connection,
-                   const key::Keypair &our_keypair) {
+                   const key::Keypair &our_keypair,
+                   const SocketCreator &socket_creator) {
   LOG(level::Info) << "Attempting connection as Client (to "
                    << mediator_connection.get_punched_peer().address << ")";
   // close mediator socket and attempt to connect to the Peer specified in the
@@ -43,16 +44,14 @@ _connect_as_client(MediatorConnection &mediator_connection,
   // it's possible that the Peer hasn't had time to create its listening
   // socket yet, so if the connection fails we retry again once.
   try {
-    socket = std::make_shared<Socket>(
-        mediator_connection.get_punched_peer().address);
+    socket = socket_creator(mediator_connection.get_punched_peer().address);
   } catch (const socket::SocketException &e) {
     LOG(level::Warning) << "Failed to connect to "
                         << mediator_connection.get_punched_peer().address
                         << ", retrying in " << backoff_duration_ms.count()
                         << "ms. Reason: " << e.what();
     std::this_thread::sleep_for(backoff_duration_ms);
-    socket = std::make_shared<Socket>(
-        mediator_connection.get_punched_peer().address);
+    socket = socket_creator(mediator_connection.get_punched_peer().address);
   }
 
   // send peer challenge
@@ -136,9 +135,10 @@ _connect_as_peer(MediatorConnection &mediator_connection,
 }
 
 void Connection::connect(const key::Keypair &our_keypair, const Peer &peer,
-                         const Mediator &mediator, const Callback &callback) {
+                         const Mediator &mediator, const Callback &callback,
+                         const SocketCreator &socket_creator) {
   _execute_asynchronously(std::bind(Connection::_handle_connection, our_keypair,
-                                    peer, mediator, callback));
+                                    peer, mediator, callback, socket_creator));
 }
 
 void Connection::_execute_asynchronously(std::function<void()> f) {
@@ -148,9 +148,11 @@ void Connection::_execute_asynchronously(std::function<void()> f) {
 
 void Connection::_handle_connection(const key::Keypair &our_keypair,
                                     const Peer &peer, const Mediator &mediator,
-                                    const Callback &callback) {
+                                    const Callback &callback,
+                                    const SocketCreator &socket_creator) {
   try {
-    std::shared_ptr<Socket> socket = _connect(our_keypair, peer, mediator);
+    std::shared_ptr<Socket> socket =
+        _connect(our_keypair, peer, mediator, socket_creator);
     LOG(level::Info) << "Successfully created socket (on "
                      << socket->get_socket_address() << ")";
     callback(Error(), socket);
@@ -170,9 +172,10 @@ void Connection::_handle_connection(const key::Keypair &our_keypair,
   }
 }
 
-std::shared_ptr<Socket> Connection::_connect(const key::Keypair &our_keypair,
-                                             const Peer &peer,
-                                             const Mediator &mediator) {
+std::shared_ptr<Socket>
+Connection::_connect(const key::Keypair &our_keypair, const Peer &peer,
+                     const Mediator &mediator,
+                     const SocketCreator &socket_creator) {
   // Depending on who handshakes with the Mediator first, either we will have
   // to connect to the Peer (we handshake first) or the Peer will connect
   // with us (they handshake first).
@@ -181,14 +184,14 @@ std::shared_ptr<Socket> Connection::_connect(const key::Keypair &our_keypair,
   // connection will yield a socket with the peer over which we must then
   // verify our identities. Otherwise, we first must create a socket with the
   // Peer before verification can happen.
-  auto mediator_connection = MediatorConnection(mediator);
+  auto mediator_connection = MediatorConnection(mediator, socket_creator);
   try {
     mediator_connection.connect(our_keypair, peer);
   } catch (const socket::SocketException &e) {
     throw ConnectionException(error::kErrorMediatorConnectFailure, e.what());
   }
   if (mediator_connection.has_punched_peer()) {
-    return _connect_as_client(mediator_connection, our_keypair);
+    return _connect_as_client(mediator_connection, our_keypair, socket_creator);
   } else if (mediator_connection.has_peer_disconnect()) {
     return _connect_as_peer(mediator_connection, our_keypair, peer);
   } else {

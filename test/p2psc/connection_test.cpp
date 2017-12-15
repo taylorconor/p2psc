@@ -1,6 +1,6 @@
 #include <boost/test/unit_test.hpp>
 #include <iostream>
-#include <p2psc/connection.h>
+#include <p2psc.h>
 
 namespace p2psc {
 namespace test {
@@ -23,7 +23,7 @@ BOOST_AUTO_TEST_CASE(ShouldCallbackWithErrorForNonExistantMediator) {
     has_called_callback = true;
     cv.notify_one();
   };
-  Connection::connect(keypair, peer, mediator, callback);
+  p2psc::connect(keypair, peer, mediator, callback);
   std::unique_lock<std::mutex> lock(mutex);
   cv.wait(lock);
   BOOST_ASSERT(has_called_callback);
