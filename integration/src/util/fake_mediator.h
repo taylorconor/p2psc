@@ -22,6 +22,7 @@ public:
   void stop();
 
   void quit_after(message::MessageType message_type);
+  void await_shutdown();
 
   p2psc::Mediator get_mediator_description() const;
   std::vector<std::string> get_received_messages() const;
@@ -37,7 +38,8 @@ private:
   std::vector<std::thread> _handler_pool;
   std::vector<std::string> _received_messages;
   std::vector<std::string> _sent_messages;
-  std::condition_variable _cv;
+  std::condition_variable _disconnect_cv;
+  std::condition_variable _shutdown_cv;
   std::mutex _mutex;
   std::unordered_set<socket::SocketAddress> _completed_disconnects;
   std::uint8_t _protocol_version;

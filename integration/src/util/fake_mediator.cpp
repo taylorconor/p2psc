@@ -13,6 +13,7 @@
   if (message_type == quit_indicator) {                                        \
     LOG(level::Debug) << "Finishing connection handling (after "               \
                       << message::message_type_string(quit_indicator) << ")";  \
+    _shutdown_cv.notify_all();                                                 \
     return;                                                                    \
   }
 
@@ -162,6 +163,13 @@ void FakeMediator::_handle_connection(std::shared_ptr<Socket> session_socket) {
 
     QUIT_IF_REQUESTED(peer_disconnect.format().type, _quit_after);
   }
+
+  _shutdown_cv.notify_all();
+}
+
+void FakeMediator::await_shutdown() {
+  std::unique_lock<std::mutex> lock(_mutex);
+  _disconnect_cv.wait(lock);
 }
 
 void FakeMediator::_add_to_disconnects(const socket::SocketAddress &address) {
@@ -169,12 +177,12 @@ void FakeMediator::_add_to_disconnects(const socket::SocketAddress &address) {
     std::lock_guard<std::mutex> guard(_mutex);
     _completed_disconnects.insert(address);
   }
-  _cv.notify_all();
+  _disconnect_cv.notify_all();
 }
 
 void FakeMediator::_wait_for_disconnect(const socket::SocketAddress &address) {
   std::unique_lock<std::mutex> lock(_mutex);
-  _cv.wait(lock, [&]() {
+  _disconnect_cv.wait(lock, [&]() {
     return _completed_disconnects.find(address) != _completed_disconnects.end();
   });
   _completed_disconnects.erase(address);

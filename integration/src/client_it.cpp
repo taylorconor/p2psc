@@ -86,6 +86,7 @@ BOOST_AUTO_TEST_CASE(ShouldSendPeerIdentificationToFirstPeer) {
                                client_keypair.get_serialised_public_key())),
                            mediator.get_mediator_description(), peer_keypair);
   const auto peer_socket = peer.connect_async();
+  mediator.await_shutdown();
   block(kDefaultPeerConnectTimeout);
 
   BOOST_ASSERT(client_socket != nullptr);
