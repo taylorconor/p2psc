@@ -19,14 +19,19 @@ inline void send_and_log(std::shared_ptr<Socket> socket,
 }
 
 template <class T>
+inline void log_message(const message::MessageFormat<T> &message,
+                        const socket::SocketAddress &socket_address) {
+  const auto message_type = message::message_type_string(message.type);
+  LOG(level::Debug) << "Received " << message_type << " from "
+                    << socket_address.ip() << ":" << socket_address.port()
+                    << ": " << encode(message);
+}
+
+template <class T>
 inline Message<T> receive_and_log(std::shared_ptr<Socket> socket) {
   const auto raw_message = socket->receive();
   auto message = message::decode<T>(raw_message);
-  const auto message_type = message::message_type_string(message.type);
-  LOG(level::Debug) << "Received " << message_type << " from "
-                    << socket->get_socket_address().ip() << ":"
-                    << socket->get_socket_address().port() << ": "
-                    << raw_message;
+  log_message(message, socket->get_socket_address());
   return message.payload;
 }
 }

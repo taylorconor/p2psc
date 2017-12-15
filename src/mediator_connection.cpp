@@ -46,11 +46,13 @@ void MediatorConnection::connect(const key::Keypair &our_keypair,
     if (mediator_response_type == message::kTypeAdvertiseAbort) {
       const auto advertise_abort =
           message::decode<message::AdvertiseAbort>(raw_mediator_response);
+      message::log_message(advertise_abort, _socket->get_socket_address());
       throw std::runtime_error("AdvertiseAbort: " +
                                advertise_abort.payload.reason);
     } else if (mediator_response_type == message::kTypeAdvertiseRetry) {
       const auto advertise_retry =
           message::decode<message::AdvertiseRetry>(raw_mediator_response);
+      message::log_message(advertise_retry, _socket->get_socket_address());
       if (advertise_retries == MAX_ADVERTISE_RETRIES) {
         throw std::runtime_error(
             "AdvertiseRetry: Retried " + std::to_string(advertise_retries) +
@@ -60,6 +62,10 @@ void MediatorConnection::connect(const key::Keypair &our_keypair,
                        << advertise_retry.payload.reason;
       advertise_retries++;
     } else if (mediator_response_type == message::kTypeAdvertiseChallenge) {
+      const auto advertise_challenge_message =
+          message::decode<message::AdvertiseChallenge>(raw_mediator_response);
+      message::log_message(advertise_challenge_message,
+                           _socket->get_socket_address());
       advertise_challenge =
           message::decode<message::AdvertiseChallenge>(raw_mediator_response)
               .payload;
@@ -88,18 +94,18 @@ void MediatorConnection::connect(const key::Keypair &our_keypair,
   const auto raw_message = _socket->receive();
   const auto message_type = message::decode_message_type(raw_message);
   if (message_type == message::kTypePeerIdentification) {
-    LOG(level::Debug) << "Received PeerIdentification: " << raw_message;
     const auto peer_identification =
         message::decode<message::PeerIdentification>(raw_message);
+    message::log_message(peer_identification, _socket->get_socket_address());
     const auto socket_address = socket::SocketAddress(
         peer_identification.payload.ip, peer_identification.payload.port);
     _punched_peer =
         PunchedPeer(peer, socket_address, peer_identification.payload.version);
     _connected = true;
   } else if (message_type == message::kTypePeerDisconnect) {
-    LOG(level::Debug) << "Received PeerDisconnect: " << raw_message;
     const auto peer_disconnect =
         message::decode<message::PeerDisconnect>(raw_message);
+    message::log_message(peer_disconnect, _socket->get_socket_address());
     _peer_disconnect = peer_disconnect.payload;
     _connected = true;
   } else {
