@@ -21,36 +21,37 @@ involved in the handshake must be defined; the connecting peer provides its own
 Keypair, a reference to the Peer it wishes to connect to, and a reference to the
 Mediator that will mediate the connection:
 
-`p2psc::connect(const key::Keypair &, const Peer &, const Mediator &, const
-Callback &)`
+```C++
+p2psc::connect(const key::Keypair &, const Peer &, const Mediator &, const Callback &);
+```
 
 A Callback is also provided, which will be called either with an error, or with
 a socket that has been successfully connected to the specified Peer. It is
 defined as:
 
-`using Callback = std::function<void(p2psc::Error,
-std::shared_ptr<p2psc::Socket>)>;`
+```C++
+using Callback = std::function<void(p2psc::Error, std::shared_ptr<p2psc::Socket>)>;
+```
 
 ## Example
 Here's a basic example, which assumes we know the public key of the Peer we want
 to connect to. In practice, sharing of the public key will likely happen in the
 application layer above p2psc.
-**TODO: the sad state of this example should motivate trimming the fat soon!**
 ```C++
 #include <p2psc/connection.h>
 
 int main() {
-    auto my_keypair = p2psc::key::Keypair::from_pem("my_keypair.pem");
-    auto their_key = p2psc::key::PublicKey::from_pem("their_public_key.pem");
-    auto peer = p2psc::Peer(their_key);
-    auto mediator = p2psc::Mediator("127.0.0.1", 1337);
+  auto my_keypair = p2psc::key::Keypair::from_pem("my_keypair.pem");
+  auto their_key = p2psc::key::PublicKey::from_pem("their_public_key.pem");
+  auto peer = p2psc::Peer(their_key);
+  auto mediator = p2psc::Mediator("127.0.0.1", 1337);
 
-    p2psc::Connection::connect(keypair, peer, mediator,
-        [](p2psc::Error error, std::shared_ptr<p2psc::Socket> socket) {
-          if (!error) {
-            socket->send("Hallå!");
-          }
-        });
+  p2psc::connect(keypair, peer, mediator,
+                 [](p2psc::Error error, std::shared_ptr<p2psc::Socket> socket) {
+                   if (!error) {
+                     socket->send("Hallå!");
+                   }
+                 });
 }
 ```
 

@@ -29,10 +29,21 @@ facilitates the beginning of the
 longer needed for the rest of the session.
 
 ## Coordinating a Peer handshake
-When both Peers are online and wish to connect with each other, the Mediator
-must send a [`PeerIdentification`](protocol.md#a_peer-identification) message to
-the Peer that registered with the Mediator first (the _Client_). The Mediator
-includes the other Peer's observed IP and port in this message. Any timeout or
-other communication error observed by the Mediator is considered an error, and
-the Mediator will close its connection to both Peers involved in the Peer
+When both Peers are online and wish to connect with each other, the Mediator 
+must send a [`PeerDisconnect`](protocol.md#a_peer-disconnect) message to the 
+Peer that registered with the Mediator last (the _Peer_). This message should 
+include the IP and port of the Peer as observed by the Mediator. This will 
+allow the Peer to set up a listening socket to listen for a P2P connection from
+the Peer that registered with the Mediator first (the _Client_). 
+ 
+The Mediator must also send a
+[`PeerIdentification`](protocol.md#a_peer-identification) message to the Peer
+that registered with the Mediator first (the _Client_). The Mediator includes
+the other Peer's observed IP and port in this message. Any timeout or other 
+communication error observed by the Mediator is considered an error, and the 
+Mediator will close its connection to both Peers involved in the Peer
 handshake in such an event.
+
+The Mediator should guarantee that the `PeerDisconnect` message is received 
+by the Peer before it sends the `PeerIdentification`, so that the Peer is 
+already listening by the time the Client becomes aware of its IP and port.
