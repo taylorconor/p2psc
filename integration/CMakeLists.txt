@@ -8,13 +8,15 @@ add_executable(p2psc_integration_test
         src/util/client.h
         src/util/fake_mediator.h
         src/util/key_to_identifier_store.h
+        include/util/peer_identifier.h
+        src/util/stateful_socket.h
 
         test.cpp
         src/client_it.cpp
         src/util/client.cpp
         src/util/fake_mediator.cpp
         src/util/key_to_identifier_store.cpp
-        include/util/peer_identifier.h)
+        src/util/stateful_socket.cpp)
 
 target_link_libraries(p2psc_integration_test
         p2psc

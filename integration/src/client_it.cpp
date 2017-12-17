@@ -15,6 +15,17 @@ const uint64_t kDefaultPeerConnectTimeout = 100;
 void block(uint64_t ms) {
   std::this_thread::sleep_for(std::chrono::milliseconds(ms));
 }
+
+const auto stateful_socket_creator =
+    [](const SocketAddressOrFileDescriptor &address_or_file_descriptor) {
+      if (address_or_file_descriptor.has_socket_address()) {
+        return std::make_shared<util::StatefulSocket>(
+            address_or_file_descriptor.socket_address());
+      } else {
+        return std::make_shared<util::StatefulSocket>(
+            address_or_file_descriptor.sock_fd());
+      }
+    };
 }
 
 /**
@@ -24,7 +35,7 @@ void block(uint64_t ms) {
 BOOST_AUTO_TEST_SUITE(client_integration_test)
 
 BOOST_AUTO_TEST_CASE(ShouldSendValidAdvertise) {
-  util::FakeMediator mediator;
+  util::FakeMediator mediator(stateful_socket_creator);
   mediator.quit_after(message::kTypeAdvertise);
   mediator.run();
 
@@ -45,7 +56,7 @@ BOOST_AUTO_TEST_CASE(ShouldSendValidAdvertise) {
 }
 
 BOOST_AUTO_TEST_CASE(ShouldCorrectlyProveIdentityWithNonce) {
-  util::FakeMediator mediator;
+  util::FakeMediator mediator(stateful_socket_creator);
   mediator.quit_after(message::kTypeAdvertiseResponse);
   mediator.run();
 
@@ -69,7 +80,7 @@ BOOST_AUTO_TEST_CASE(ShouldCorrectlyProveIdentityWithNonce) {
 }
 
 BOOST_AUTO_TEST_CASE(ShouldSendPeerIdentificationToFirstPeer) {
-  util::FakeMediator mediator;
+  util::FakeMediator mediator(stateful_socket_creator);
   mediator.quit_after(message::kTypePeerIdentification);
   mediator.run();
 
@@ -105,6 +116,41 @@ BOOST_AUTO_TEST_CASE(ShouldSendPeerIdentificationToFirstPeer) {
                client_socket->get_socket_address().port());
   BOOST_ASSERT(peer_identification.payload.ip ==
                client_socket->get_socket_address().ip());
+}
+
+BOOST_AUTO_TEST_CASE(ShouldCompletePeerHandshake) {
+  util::FakeMediator mediator(stateful_socket_creator);
+  mediator.run();
+
+  const auto client_keypair = key::Keypair::generate();
+  const auto peer_keypair = key::Keypair::generate();
+  auto client =
+      util::Client(Peer(key::PublicKey::from_string(
+                       peer_keypair.get_serialised_public_key())),
+                   mediator.get_mediator_description(), client_keypair);
+  // the client connects first
+  const auto client_socket = client.connect_async();
+  block(kDefaultPeerConnectTimeout);
+  auto peer = util::Client(Peer(key::PublicKey::from_string(
+                               client_keypair.get_serialised_public_key())),
+                           mediator.get_mediator_description(), peer_keypair);
+  const auto peer_socket = peer.connect_async();
+  mediator.await_shutdown();
+  block(kDefaultPeerConnectTimeout);
+
+  BOOST_ASSERT(client_socket->get_sent_messages().size() == 2);
+  BOOST_ASSERT(peer_socket->get_sent_messages().size() == 2);
+  BOOST_ASSERT(client_socket->get_received_messages().size() == 2);
+  BOOST_ASSERT(peer_socket->get_received_messages().size() == 2);
+
+  const auto message_type =
+      message::decode_message_type(client_socket->get_sent_messages()[0]);
+  BOOST_ASSERT(message_type == message::kTypePeerChallenge);
+
+  const auto message = "bananarama!";
+  client_socket->send(message);
+  const auto received_message = peer_socket->receive();
+  BOOST_ASSERT(received_message == message);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -17,8 +17,8 @@ public:
   Socket(int sock_fd);
   ~Socket();
 
-  void send(const std::string &);
-  std::string receive();
+  virtual void send(const std::string &);
+  virtual std::string receive();
   socket::SocketAddress get_socket_address();
   void close();
 

@@ -14,8 +14,9 @@ namespace util {
 
 class FakeMediator {
 public:
-  FakeMediator();
-  FakeMediator(const p2psc::Mediator &mediator);
+  FakeMediator(const SocketCreator &socket_creator);
+  FakeMediator(const SocketCreator &socket_creator,
+               const p2psc::Mediator &mediator);
   ~FakeMediator();
 
   void run();

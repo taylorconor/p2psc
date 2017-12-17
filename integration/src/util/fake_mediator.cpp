@@ -21,14 +21,15 @@ namespace p2psc {
 namespace integration {
 namespace util {
 
-FakeMediator::FakeMediator()
-    : _socket(std::make_unique<socket::LocalListeningSocket>()),
+FakeMediator::FakeMediator(const SocketCreator &socket_creator)
+    : _socket(std::make_unique<socket::LocalListeningSocket>(socket_creator)),
       _mediator(_socket->get_socket_address().ip(),
                 _socket->get_socket_address().port()),
       _is_running(false), _protocol_version(kVersion) {}
 
-FakeMediator::FakeMediator(const p2psc::Mediator &mediator)
-    : _socket(std::make_unique<socket::LocalListeningSocket>()),
+FakeMediator::FakeMediator(const SocketCreator &socket_creator,
+                           const p2psc::Mediator &mediator)
+    : _socket(std::make_unique<socket::LocalListeningSocket>(socket_creator)),
       _mediator(mediator), _is_running(false), _protocol_version(kVersion) {}
 
 FakeMediator::~FakeMediator() {

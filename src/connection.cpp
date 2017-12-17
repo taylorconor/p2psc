@@ -92,7 +92,8 @@ _connect_as_client(MediatorConnection &mediator_connection,
 
 std::shared_ptr<Socket>
 _connect_as_peer(MediatorConnection &mediator_connection,
-                 const key::Keypair &our_keypair, const Peer &peer) {
+                 const key::Keypair &our_keypair, const Peer &peer,
+                 const SocketCreator &socket_creator) {
   const auto socket_address = socket::SocketAddress(
       socket::local_ip, mediator_connection.get_peer_disconnect().port);
   LOG(level::Info) << "Attempting connection as Peer (on " << socket_address
@@ -102,7 +103,7 @@ _connect_as_peer(MediatorConnection &mediator_connection,
                     << socket_address;
   mediator_connection.close_socket();
   const auto listening_socket = std::make_unique<socket::LocalListeningSocket>(
-      mediator_connection.get_peer_disconnect().port);
+      socket_creator, mediator_connection.get_peer_disconnect().port);
   const auto socket = listening_socket->accept();
 
   // receive peer challenge
@@ -193,7 +194,8 @@ Connection::_connect(const key::Keypair &our_keypair, const Peer &peer,
   if (mediator_connection.has_punched_peer()) {
     return _connect_as_client(mediator_connection, our_keypair, socket_creator);
   } else if (mediator_connection.has_peer_disconnect()) {
-    return _connect_as_peer(mediator_connection, our_keypair, peer);
+    return _connect_as_peer(mediator_connection, our_keypair, peer,
+                            socket_creator);
   } else {
     throw std::runtime_error("No PunchedPeer or PeerDisconnect");
   }
