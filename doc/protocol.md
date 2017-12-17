@@ -14,6 +14,13 @@ their communication.
 We also assume the presence of a Mediator, a server trusted by both Peers, to
 mediate the handshake. A Mediator specification is outlined [here](mediator.md).
 
+## Overview
+This diagram shows an overview of the happy path of the protocol, to connect 
+a Client and a Peer using a Mediator:  
+<p align="center"> 
+<img src="https://docs.google.com/drawings/d/e/2PACX-1vQhsUwxtrYXiDjyLN7GmzgGPZpLIaEophPTXVajxJngMg831t6npRvpmb7PsaPTqHSGWVvZJoIK7_xM/pub?w=688&h=776">
+</p>
+
 ## Handshake
 A socket creation handshake happens in two stages; first, the Client registers
 with the Mediator (the _Mediator Handshake_). Then, the Mediator facilitates the
