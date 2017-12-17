@@ -1,3 +1,3 @@
 [submodule "vendor/spotify-json"]
 	path = vendor/spotify-json
-	url = git@github.com:spotify/spotify-json.git
+	url = https://github.com/spotify/spotify-json.git
