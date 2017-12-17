@@ -25,3 +25,4 @@ target_link_libraries(p2psc_integration_test
 target_include_directories(p2psc_integration_test PRIVATE
         .
         ../src)
+add_test(NAME p2psc_integration_tests COMMAND p2psc_integration_test)
