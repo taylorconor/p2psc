@@ -3,7 +3,6 @@
 #include <p2psc/log.h>
 #include <p2psc/socket/socket.h>
 #include <sstream>
-#include <sys/filio.h>
 #include <sys/ioctl.h>
 
 namespace p2psc {
@@ -32,7 +31,7 @@ Socket::~Socket() {
 void Socket::send(const std::string &message) {
   _check_is_open();
   const auto size = ::send(_sock_fd, &message[0], message.size(), 0);
-  if (size != message.length()) {
+  if (static_cast<const unsigned long>(size) != message.length()) {
     std::stringstream fmt;
     fmt << "Unexpected data send length. Expected: " << message.length()
         << ", actual: " << size;

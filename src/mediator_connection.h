@@ -9,6 +9,7 @@
 #include <p2psc/punched_peer.h>
 #include <p2psc/socket/socket.h>
 #include <p2psc/socket_creator.h>
+#include <memory>
 
 namespace p2psc {
 

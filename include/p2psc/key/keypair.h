@@ -1,6 +1,7 @@
 #pragma once
 
 #include <p2psc/crypto/pki.h>
+#include <memory>
 
 namespace p2psc {
 namespace key {

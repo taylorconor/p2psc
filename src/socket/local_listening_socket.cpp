@@ -2,6 +2,7 @@
 
 #include <arpa/inet.h>
 #include <p2psc/log.h>
+#include <mutex>
 
 namespace p2psc {
 namespace socket {

@@ -1,6 +1,5 @@
 #pragma once
 
-#include <boost/type_index.hpp>
 #include <p2psc/message/message_exception.h>
 #include <p2psc/message/message_format.h>
 #include <spotify/json/decode.hpp>
@@ -16,7 +15,7 @@ static message::MessageFormat<T> decode(const std::string &message) {
     return spotify::json::decode<message::MessageFormat<T>>(message);
   } catch (const spotify::json::decode_exception &e) {
     throw message::MessageException(
-        "Could not decode " + boost::typeindex::type_id<T>().pretty_name() +
+        "Could not decode " + message_type_string(T::type) +
         " message. Reason: " + std::string(e.what()));
   }
 }

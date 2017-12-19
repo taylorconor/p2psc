@@ -1,5 +1,6 @@
 #pragma once
 
+#include <condition_variable>
 #include <p2psc/mediator.h>
 #include <p2psc/message/message.h>
 #include <p2psc/message/types.h>
@@ -17,7 +18,7 @@ public:
   FakeMediator(const SocketCreator &socket_creator);
   FakeMediator(const SocketCreator &socket_creator,
                const p2psc::Mediator &mediator);
-  ~FakeMediator();
+  ~FakeMediator() throw();
 
   void run();
   void stop();

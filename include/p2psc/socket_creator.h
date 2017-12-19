@@ -3,6 +3,7 @@
 #include <functional>
 #include <p2psc/socket/socket.h>
 #include <p2psc/socket/socket_address.h>
+#include <memory>
 
 namespace p2psc {
 class SocketAddressOrFileDescriptor {

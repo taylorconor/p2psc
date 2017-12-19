@@ -1,6 +1,7 @@
 #include <boost/test/unit_test.hpp>
 #include <p2psc/log.h>
 #include <socket/local_listening_socket.h>
+#include <condition_variable>
 
 namespace p2psc {
 namespace test {

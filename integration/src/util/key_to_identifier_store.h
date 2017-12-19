@@ -1,6 +1,7 @@
 #pragma once
 
 #include <boost/optional.hpp>
+#include <condition_variable>
 #include <include/util/peer_identifier.h>
 #include <map>
 #include <mutex>

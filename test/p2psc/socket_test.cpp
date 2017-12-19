@@ -2,6 +2,7 @@
 #include <p2psc/log.h>
 #include <p2psc/socket/socket.h>
 #include <socket/local_listening_socket.h>
+#include <condition_variable>
 
 namespace p2psc {
 namespace test {

@@ -3,6 +3,7 @@
 #include <crypto/rsa.h>
 #include <openssl/err.h>
 #include <p2psc/crypto/crypto_exception.h>
+#include <string.h>
 
 namespace p2psc {
 namespace crypto {
@@ -28,7 +29,9 @@ std::string bio_to_string(BIO *bio) {
 
 ::RSA *string_to_key(const std::string &key_str) {
   // TODO: does this leak?
-  BIO *bio = BIO_new_mem_buf(key_str.c_str(), key_str.length());
+  BIO *bio = BIO_new_mem_buf(
+      reinterpret_cast<void *>(const_cast<char *>(key_str.c_str())),
+      key_str.length());
   ::RSA *key = PEM_read_bio_RSAPublicKey(bio, 0, 0, 0);
   if (!key) {
     throw CryptoException("Could not load RSA public key from string");
@@ -45,7 +48,7 @@ std::string get_openssl_error_str() {
 int password_callback(char *buf, int size, int rwflag, void *userdata) {
   const char *pw = (const char *)userdata;
   const auto len = strlen(pw);
-  if (len > size) {
+  if (len > static_cast<size_t>(size)) {
     throw CryptoException("Password length (" + std::to_string(len) +
                           ") greater than buffer size (" +
                           std::to_string(size) + ").");

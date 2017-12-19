@@ -1,6 +1,9 @@
 #include <boost/test/unit_test.hpp>
 #include <iostream>
 #include <p2psc.h>
+#include <memory>
+#include <mutex>
+#include <condition_variable>
 
 namespace p2psc {
 namespace test {

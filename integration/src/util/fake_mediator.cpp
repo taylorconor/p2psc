@@ -32,7 +32,7 @@ FakeMediator::FakeMediator(const SocketCreator &socket_creator,
     : _socket(std::make_unique<socket::LocalListeningSocket>(socket_creator)),
       _mediator(mediator), _is_running(false), _protocol_version(kVersion) {}
 
-FakeMediator::~FakeMediator() {
+FakeMediator::~FakeMediator() throw() {
   if (_is_running) {
     stop();
   }

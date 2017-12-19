@@ -3,6 +3,7 @@
 #include <boost/filesystem/path.hpp>
 #include <iostream>
 #include <sstream>
+#include <mutex>
 #include <thread>
 
 namespace p2psc {
