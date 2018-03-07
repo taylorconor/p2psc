@@ -20,12 +20,11 @@ addons:
     - ninja-build
     - libboost-all-dev
 
-install:
-  - "[ $CXX = g++ ] && export CXX=g++-6 || true"
-  - "[ $CXX = clang++ ] && export CXX=clang++-3.8 || true"
+install: source .travis/install.sh
 
 script:
-  - mkdir build && cd build
+  - BUILD_DIR="${TRAVIS_BUILD_DIR}/build_cmake"
+  - mkdir -p ${BUILD_DIR} && cd ${BUILD_DIR}
   - cmake -G Ninja ..
   - ninja -j4
   - ctest --output-on-failure
