@@ -3,7 +3,7 @@ project(p2psc)
 enable_testing()
 
 set(CMAKE_CXX_FLAGS
-        "${CMAKE_CXX_FLAGS} -Wall -Werror -Wno-unused-variable -Wno-unused-command-line-argument -Wno-missing-braces -Wno-unused-function -pthread -std=c++14")
+        "${CMAKE_CXX_FLAGS} -Wall -Werror -Wno-unused-variable -Wno-sign-compare -Wno-missing-braces -Wno-unused-function -pthread -std=c++14")
 
 add_library(p2psc
         include/p2psc.h
